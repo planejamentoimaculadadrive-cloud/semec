@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Diário Digital</title>
+    <style>
+        :root { --blue: #1a73e8; --bg: #f0f2f5; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+        
+        .login-card { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+            width: 100%; 
+            max-width: 400px; 
+            text-align: center; 
+        }
+
+        /* Ajuste das Logos para não quebrarem */
+        .logo-superior { width: 100%; max-width: 80px; height: auto; margin-bottom: 20px; display: block; margin-left: auto; margin-right: auto; }
+        .logo-inferior { width: 100%; max-width: 80px; height: auto; margin-top: 25px; display: block; margin-left: auto; margin-right: auto; }
+
+        h2 { color: var(--blue); margin-bottom: 20px; font-size: 18px; text-transform: uppercase; }
+        label { display: block; text-align: left; font-size: 11px; font-weight: bold; color: #666; margin-bottom: 5px; text-transform: uppercase; }
+        
+        select, input { 
+            width: 100%; 
+            padding: 12px; 
+            margin-bottom: 15px; 
+            border: 1px solid #ddd; 
+            border-radius: 8px; 
+            font-size: 14px; 
+            background: #fff;
+            box-sizing: border-box;
+        }
+
+        .btn-login { 
+            background: var(--blue); 
+            color: white; 
+            border: none; 
+            padding: 15px; 
+            width: 100%; 
+            border-radius: 8px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            font-size: 16px;
+        }
+
+        .footer-creditos { 
+            font-size: 9px; 
+            color: #bbb; 
+            margin-top: 5px; 
+            letter-spacing: 0.5px;
+        }
+
+        #loading { color: var(--blue); font-size: 13px; margin-bottom: 10px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="login-card">
+    <img src="https://lh3.googleusercontent.com/d/1bs3UnnKGaz158PfAwzPVTq1DJ-YVRpEb" class="logo-superior" alt="Logo Superior">
+    
+    <h2>Acesso ao Sistema</h2>
+    <div id="loading">Sincronizando dados...</div>
+
+    <label>Selecione a Escola (F)</label>
+    <select id="selEscola"><option value="">Carregando...</option></select>
+
+    <label>Selecione seu Nome (B)</label>
+    <select id="selProfessor"><option value="">Carregando...</option></select>
+
+    <label>Selecione a Turma (G)</label>
+    <select id="selTurma"><option value="">Carregando...</option></select>
+
+    <label>Selecione o Turno (H)</label>
+    <select id="selTurno"><option value="">Carregando...</option></select>
+
+    <label>Senha</label>
+    <input type="password" id="senha" placeholder="Sua senha">
+
+    <button class="btn-login" onclick="realizarLogin()">ENTRAR NO DIÁRIO</button>
+
+    <img src="https://lh3.googleusercontent.com/d/1RVXMPATKTdUxYLosq3n1SkJ_3dkIU_Kp" class="logo-inferior" alt="Logo Inferior">
+
+    <div class="footer-creditos">@Erivaldo Silva</div>
+</div>
+
+<script>
+    const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbx3uBXdfBeg2arfTG6Ge7pJQ8gG4Yc6ctBQwt3bxunCnTG3pcc-aDlI-xh6tYpWPSZfgQ/exec'; 
+    let dadosPlanilha = { professores: [] };
+
+    window.onload = function() {
+        fetch(URL_SCRIPT + '?tipo=docentes')
+            .then(r => r.json())
+            .then(data => {
+                dadosPlanilha = data;
+                popularSelect('selEscola', data.escolas);
+                
+                const selProf = document.getElementById('selProfessor');
+                selProf.innerHTML = '<option value="">Escolha seu nome...</option>';
+                data.professores.forEach(p => selProf.add(new Option(p.nome, p.nome)));
+
+                popularSelect('selTurma', data.turmas);
+                popularSelect('selTurno', data.turnos);
+                document.getElementById('loading').style.display = 'none';
+            })
+            .catch(err => {
+                document.getElementById('loading').innerText = "Erro ao carregar dados.";
+            });
+    }
+
+    function popularSelect(id, lista) {
+        const sel = document.getElementById(id);
+        sel.innerHTML = '<option value="">Selecione...</option>';
+        lista.forEach(item => sel.add(new Option(item, item)));
+    }
+
+    function realizarLogin() {
+        const profNome = document.getElementById('selProfessor').value;
+        const senha = document.getElementById('senha').value;
+        const escola = document.getElementById('selEscola').value;
+        const turma = document.getElementById('selTurma').value;
+        const turno = document.getElementById('selTurno').value;
+
+        if (!profNome || !senha) { alert("Preencha os campos!"); return; }
+
+        const professor = dadosPlanilha.professores.find(p => p.nome === profNome);
+        if (professor && professor.senha === senha) {
+            localStorage.setItem('user_nome', professor.nome);
+            localStorage.setItem('user_escola', escola);
+            localStorage.setItem('user_turma', turma);
+            localStorage.setItem('user_turno', turno);
+            localStorage.setItem('user_modalidade', professor.modalidade); 
+            window.location.href = 'menu.html';
+        } else {
+            alert("Senha incorreta!");
+        }
+    }
+</script>
+</body>
+</html>

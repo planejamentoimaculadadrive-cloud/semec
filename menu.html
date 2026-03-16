@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Principal - Diário Digital</title>
+    <style>
+        :root {
+            --blue: #1a73e8;
+            --green: #1e8e3e;
+            --purple: #673ab7;
+            --red: #d93025;
+            --bg: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .menu-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .user-info {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .user-info h2 {
+            margin: 0;
+            color: var(--blue);
+            font-size: 22px;
+        }
+
+        .user-info p {
+            margin: 5px 0 0;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .btn-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: transform 0.2s, opacity 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-new { background-color: var(--green); }
+        .btn-reports { background-color: var(--blue); }
+        .btn-stats { background-color: var(--purple); }
+        .btn-logout { background-color: var(--red); margin-top: 10px; }
+
+        .btn-logout {
+            background-color: white;
+            color: var(--red);
+            border: 2px solid var(--red);
+        }
+    </style>
+</head>
+<body>
+
+<div class="menu-container">
+    <div class="user-info">
+        <h2 id="userName">Bem-vindo(a)</h2>
+        <p id="userSchool">Carregando escola...</p>
+    </div>
+
+    <div class="btn-list">
+        <button class="btn btn-new" onclick="window.location.href='formulario_infantil.html'">
+            📝 NOVO REGISTRO
+        </button>
+
+        <button class="btn btn-reports" onclick="window.location.href='relatorio_professor.html'">
+            📂 MEUS REGISTROS
+        </button>
+
+        <button class="btn btn-stats" onclick="window.location.href='minhas_estatisticas.html'">
+            📊 MINHAS ESTATÍSTICAS
+        </button>
+
+        <button class="btn btn-logout" onclick="fazerLogout()">
+            SAIR
+        </button>
+    </div>
+</div>
+
+<script>
+    window.onload = function() {
+        const nome = localStorage.getItem('user_nome');
+        const escola = localStorage.getItem('user_escola');
+        
+        if (!nome) {
+            window.location.href = 'index.html'; // Volta para o login se não houver dados
+            return;
+        }
+
+        document.getElementById('userName').innerText = "Olá, " + nome;
+        document.getElementById('userSchool').innerText = escola;
+    };
+
+    function fazerLogout() {
+        if(confirm("Deseja realmente sair do sistema?")) {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
+    }
+</script>
+
+</body>
+</html>

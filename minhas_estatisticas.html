@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minhas Estatísticas - Diário Digital</title>
+    <style>
+        :root { 
+            --blue: #1a73e8; 
+            --gray: #5f6368; 
+            --light: #f8f9fa;
+        }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 15px; color: #333; }
+        .container { max-width: 800px; margin: auto; }
+        
+        .header { background: var(--blue); color: white; padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        
+        .card-stats { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); margin-bottom: 20px; overflow-x: auto; }
+        
+        h3 { color: var(--blue); border-bottom: 2px solid var(--blue); padding-bottom: 8px; margin-top: 0; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+        th { background: var(--light); color: var(--gray); text-align: left; padding: 12px; border-bottom: 2px solid #dee2e6; text-transform: uppercase; font-size: 11px; }
+        td { padding: 12px; border-bottom: 1px solid #eee; }
+        
+        .total-anual { font-weight: bold; color: #2e7d32; background: #e8f5e9; }
+        .total-col { font-weight: bold; background: #f1f3f4; }
+
+        .btn-voltar { display: block; width: 100%; padding: 15px; background: var(--gray); color: white; text-align: center; text-decoration: none; border-radius: 10px; margin-top: 20px; font-weight: bold; box-sizing: border-box; }
+        
+        #loader { text-align: center; padding: 40px; font-weight: bold; color: var(--blue); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h2 style="margin:0">Estatísticas de Carga Horária</h2>
+        <span id="txtProf">Carregando professor...</span>
+    </div>
+
+    <div id="loader">Calculando totais de aulas...</div>
+
+    <div class="card-stats" id="quadroEstatisticas" style="display:none;">
+        <h3>Aulas por Campo de Experiência</h3>
+        <table id="tabelaStats">
+            <thead>
+                <tr>
+                    <th>Campo de Experiência</th>
+                    <th>1º Bim</th>
+                    <th>2º Bim</th>
+                    <th>3º Bim</th>
+                    <th>4º Bim</th>
+                    <th class="total-col">Total Anual</th>
+                </tr>
+            </thead>
+            <tbody id="corpoTabela">
+                </tbody>
+        </table>
+    </div>
+
+    <a href="menu.html" class="btn-voltar">VOLTAR AO MENU</a>
+</div>
+
+<script>
+    const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbynk9WBrHEVOEWYAxyVbofldS4HIzbWVIESURDTs-qPP724Xv_NOXzTbp3h4TXqAPNeQA/exec'; 
+    const profLogado = localStorage.getItem('user_nome');
+    document.getElementById('txtProf').innerText = "Prof(a): " + (profLogado || "");
+
+    window.onload = () => {
+        if(!profLogado) { window.location.href='index.html'; return; }
+        gerarEstatisticas();
+    };
+
+    function gerarEstatisticas() {
+        fetch(`${URL_SCRIPT}?tipo=ler_registros&professor=${encodeURIComponent(profLogado)}`)
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('quadroEstatisticas').style.display = 'block';
+
+                if (!data || data.length === 0) {
+                    document.getElementById('corpoTabela').innerHTML = "<tr><td colspan='6' style='text-align:center;'>Nenhum registro encontrado para calcular.</td></tr>";
+                    return;
+                }
+
+                // Objeto para organizar os dados: { "Nome do Campo": { "1º Bimestre": total, ... } }
+                const resumo = {};
+
+                data.forEach(reg => {
+                    const campo = reg.campo || "Não informado";
+                    const bimestre = reg.bimestre; // Ex: "1º Bimestre"
+                    const aulas = parseInt(reg.numAulas) || 0;
+
+                    if (!resumo[campo]) {
+                        resumo[campo] = { "1º Bimestre": 0, "2º Bimestre": 0, "3º Bimestre": 0, "4º Bimestre": 0 };
+                    }
+                    
+                    if (resumo[campo].hasOwnProperty(bimestre)) {
+                        resumo[campo][bimestre] += aulas;
+                    }
+                });
+
+                const corpo = document.getElementById('corpoTabela');
+                corpo.innerHTML = "";
+
+                // Transforma o objeto em linhas da tabela
+                Object.keys(resumo).sort().forEach(campo => {
+                    const b1 = resumo[campo]["1º Bimestre"];
+                    const b2 = resumo[campo]["2º Bimestre"];
+                    const b3 = resumo[campo]["3º Bimestre"];
+                    const b4 = resumo[campo]["4º Bimestre"];
+                    const totalAnual = b1 + b2 + b3 + b4;
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><b>${campo}</b></td>
+                        <td>${b1}</td>
+                        <td>${b2}</td>
+                        <td>${b3}</td>
+                        <td>${b4}</td>
+                        <td class="total-anual">${totalAnual}</td>
+                    `;
+                    corpo.appendChild(tr);
+                });
+            })
+            .catch(err => {
+                document.getElementById('loader').innerHTML = "Erro ao carregar estatísticas.";
+                console.error(err);
+            });
+    }
+</script>
+
+</body>
+</html>

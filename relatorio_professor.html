@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meus Lançamentos - Diário Digital</title>
+    <style>
+        :root { 
+            --blue: #1a73e8; 
+            --red: #d93025; 
+            --yellow: #fbbc04; 
+            --gray: #5f6368; 
+        }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 15px; }
+        .container { max-width: 600px; margin: auto; }
+        
+        .header { background: var(--blue); color: white; padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        
+        /* Botão Voltar no Topo */
+        .btn-voltar-topo { 
+            display: block; 
+            width: 100%; 
+            padding: 12px; 
+            background: var(--gray); 
+            color: white; 
+            text-align: center; 
+            text-decoration: none; 
+            border-radius: 10px; 
+            margin-bottom: 20px; 
+            font-weight: bold; 
+            box-sizing: border-box;
+            font-size: 14px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .busca-container { margin-bottom: 20px; }
+        #inputBusca { 
+            width: 100%; 
+            padding: 15px; 
+            border-radius: 10px; 
+            border: 2px solid #ddd; 
+            font-size: 16px; 
+            box-sizing: border-box;
+            outline: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        #inputBusca:focus { border-color: var(--blue); }
+
+        .card { 
+            background: white; margin-bottom: 15px; padding: 15px; border-radius: 10px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-left: 5px solid var(--blue);
+            display: flex; flex-direction: column;
+        }
+        
+        .topo-card { display: flex; justify-content: space-between; font-weight: bold; font-size: 13px; color: var(--gray); border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 10px; }
+        
+        /* Layout dos Botões: Alinhados à Esquerda e Empilhados */
+        .acoes { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: flex-start; 
+            gap: 10px; 
+            margin-top: 15px; 
+            width: 100%;
+        }
+        
+        .btn { 
+            border: none; 
+            padding: 12px 20px; 
+            border-radius: 8px; 
+            color: white; 
+            font-weight: bold; 
+            cursor: pointer; 
+            text-transform: uppercase; 
+            font-size: 11px; 
+            width: 200px; 
+            text-align: left; 
+        }
+        
+        .btn-edit { background: var(--yellow); color: #000; }
+        .btn-pdf { background: var(--blue); }
+        .btn-del { background: var(--red); }
+        
+        #loader { text-align: center; padding: 30px; color: var(--blue); font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h2 style="margin:0">Meus Lançamentos</h2>
+        <span id="txtProf">Carregando...</span>
+    </div>
+
+    <a href="menu.html" class="btn-voltar-topo">⬅ VOLTAR AO MENU</a>
+
+    <div class="busca-container">
+        <input type="text" id="inputBusca" onkeyup="filtrarRegistros()" placeholder="🔍 Buscar por escola, data ou conteúdo...">
+    </div>
+
+    <div id="loader">Buscando seus registros...</div>
+    <div id="lista"></div>
+</div>
+
+<script>
+    const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbynk9WBrHEVOEWYAxyVbofldS4HIzbWVIESURDTs-qPP724Xv_NOXzTbp3h4TXqAPNeQA/exec'; 
+    const profLogado = localStorage.getItem('user_nome');
+    document.getElementById('txtProf').innerText = "Prof(a): " + (profLogado || "");
+
+    window.onload = () => { if(!profLogado) window.location.href='index.html'; carregar(); };
+
+    function carregar() {
+        fetch(`${URL_SCRIPT}?tipo=ler_registros&professor=${encodeURIComponent(profLogado)}`)
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('loader').style.display = 'none';
+                renderizarLista(data);
+            });
+    }
+
+    function renderizarLista(data) {
+        const list = document.getElementById('lista');
+        list.innerHTML = "";
+
+        if (!data || data.length === 0) {
+            list.innerHTML = "<div style='text-align:center; padding:20px; background:white; border-radius:10px;'>Nenhum registro encontrado.</div>";
+            return;
+        }
+
+        data.forEach(reg => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.setAttribute('data-info', `${reg.escola} ${reg.data} ${reg.campo} ${reg.bimestre}`.toLowerCase());
+            
+            card.innerHTML = `
+                <div class="topo-card"><span>📅 ${reg.data}</span><span>${reg.bimestre}</span></div>
+                <div style="font-size:14px;">
+                    <p><b>Escola:</b> ${reg.escola}</p>
+                    <p><b>Aulas:</b> ${reg.numAulas} H/A</p>
+                    <p><b>Campo:</b> ${reg.campo}</p>
+                </div>
+                <div class="acoes">
+                    <button class="btn btn-edit" onclick='editar(${JSON.stringify(reg)})'>📝 Corrigir Registro</button>
+                    <button class="btn btn-pdf" onclick='gerarPDF(${JSON.stringify(reg)})'>📄 Imprimir / PDF</button>
+                    <button class="btn btn-del" onclick="excluir('${reg.id}')">🗑️ Excluir Registro</button>
+                </div>
+            `;
+            list.appendChild(card);
+        });
+    }
+
+    function filtrarRegistros() {
+        const termo = document.getElementById('inputBusca').value.toLowerCase();
+        const cards = document.getElementsByClassName('card');
+        for (let i = 0; i < cards.length; i++) {
+            const info = cards[i].getAttribute('data-info');
+            cards[i].style.display = info.includes(termo) ? "" : "none";
+        }
+    }
+
+    function editar(dados) {
+        localStorage.setItem('edit_dados', JSON.stringify(dados));
+        window.location.href = 'formulario_infantil.html';
+    }
+
+    function excluir(id) {
+        if(confirm("Deseja excluir permanentemente este registro?")) {
+            fetch(`${URL_SCRIPT}?acao=excluir&id=${id}`, {mode:'no-cors'}).then(() => location.reload());
+        }
+    }
+
+    function gerarPDF(dados) {
+        const logosEscolas = {
+            "EMEIF MARIA MADALENA TORRES DANTAS": "https://lh3.googleusercontent.com/d/1m2edYTssohJHNbAsH6faLpD-EPiOFySV",
+            "EMEIF JOÃO GONÇALVES DA SILVA": "https://lh3.googleusercontent.com/d/1Azxwq1p2gHmOOJGUeKfIS0bqYGpnypcf",
+            "EMEIF JOSÉ ALVES SABINO": "https://lh3.googleusercontent.com/d/1CXvXM9S0DOtG5qglCTMW6ieNGthmRmhK",
+            "CRECHE MUNICIPAL RAIMUNDA TRINDADE SABINO": "https://lh3.googleusercontent.com/d/1oq-Ab-5mncMrnHTXxnmgbhgjJfP7y7Yj",
+            "EMEIF JOSÉ VIEIRA DA SILVA": "https://lh3.googleusercontent.com/d/19-cir2L2bWYR7sj39_DoNjpckopXRGz-",
+            "EMEIF MARIA PEREIRA DOS SANTOS": "https://lh3.googleusercontent.com/d/17G_gQ3Kaz9xSqBU--lblaSejZylqZ2t6",
+            "ESCOLA JARDIM DE DEUS AÇÃO EVANGELICA": "https://lh3.googleusercontent.com/d/1RWc8dAv73W9drrvqG44vHSNMS_RRxFh2"
+        };
+
+        const linkLogo = logosEscolas[dados.escola] || "";
+
+        const win = window.open('', '', 'width=850,height=900');
+        win.document.write(`
+            <html>
+            <head>
+                <style>
+                    body { font-family: sans-serif; padding: 40px; color: #333; line-height: 1.5; }
+                    .header-pdf { text-align: center; border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 20px; }
+                    .logo { max-width: 280px; max-height: 120px; margin-bottom: 10px; }
+                    .box-info { background: #f2f2f2; padding: 15px; border-radius: 5px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; font-size: 13px; }
+                    .secao { border: 1px solid #ddd; padding: 12px; margin-bottom: 10px; border-radius: 5px; }
+                    .label { font-weight: bold; color: #1a73e8; font-size: 11px; text-transform: uppercase; display: block; }
+                </style>
+            </head>
+            <body>
+                <div class="header-pdf">
+                    ${linkLogo ? `<img src="${linkLogo}" class="logo">` : ''}
+                    <div style="font-weight:bold; font-size:18px;">Relatório de Registro Pedagógico</div>
+                </div>
+                <div class="box-info">
+                    <div><b>Escola:</b> ${dados.escola}</div>
+                    <div><b>Data:</b> ${dados.data}</div>
+                    <div><b>Professor(a):</b> ${dados.professor}</div>
+                    <div><b>Bimestre:</b> ${dados.bimestre}</div>
+                    <div><b>Turma/Turno:</b> ${dados.turma} (${dados.turno})</div>
+                    <div><b>Aulas:</b> ${dados.numAulas} H/A</div>
+                </div>
+                <div class="secao"><span class="label">Campo de Experiência</span>${dados.campo}</div>
+                <div class="secao"><span class="label">Objetivo de Aprendizagem</span>${dados.objetivo}</div>
+                <div class="secao"><span class="label">Metodologia</span>${dados.metodologia}</div>
+                ${dados.observacoes ? `<div class="secao"><span class="label">Observações</span>${dados.observacoes}</div>` : ''}
+                <div style="margin-top:50px; text-align:center;">__________________________________<br>Assinatura do Professor(a)</div>
+                <script>window.onload = () => { setTimeout(() => { window.print(); }, 1200); };<\/script>
+            </body>
+            </html>
+        `);
+        win.document.close();
+    }
+</script>
+</body>
+</html>
