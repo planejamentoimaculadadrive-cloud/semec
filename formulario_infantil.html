@@ -5,170 +5,249 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro - Diário Digital</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; padding: 20px; margin: 0; }
-        .card { background: white; width: 100%; max-width: 500px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); overflow: hidden; }
-        .header { background-color: #2196F3; color: white; text-align: center; padding: 20px; font-weight: bold; font-size: 24px; text-transform: uppercase; }
+        :root {
+            --blue-main: #2196F3;
+            --green-btn: #2E7D32;
+            --bg-body: #f4f7f6;
+            --text-dark: #444;
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg-body); display: flex; justify-content: center; padding: 15px; margin: 0; }
+        .card { background: white; width: 100%; max-width: 550px; border-radius: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.08); overflow: hidden; }
+        .header { background-color: var(--blue-main); color: white; text-align: center; padding: 20px; }
+        .header h1 { margin: 0; font-size: 18px; text-transform: uppercase; letter-spacing: 1px; }
+        
         .content { padding: 20px; }
-        .row { display: flex; gap: 10px; margin-bottom: 15px; }
-        .col { flex: 1; }
-        label { display: block; font-size: 11px; font-weight: bold; color: #444; margin-bottom: 5px; text-transform: uppercase; }
-        select, input, textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none; }
-        .campo-aulas { background: #fff8e1; border: 1px solid #ffe082; padding: 10px; border-radius: 8px; margin-bottom: 15px; }
-        .btn-salvar { background-color: #2E7D32; color: white; border: none; width: 100%; padding: 15px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
-        .btn-cancelar { display: block; text-align: center; color: #777; text-decoration: none; margin-top: 15px; font-size: 13px; text-transform: uppercase; }
+        .row-tripla { display: grid; grid-template-columns: 1.2fr 0.8fr 1fr; gap: 10px; margin-bottom: 15px; }
+        
+        label { display: block; font-weight: bold; margin-bottom: 5px; color: var(--text-dark); font-size: 13px; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
+        
+        .campo-bncc { background: #e3f2fd; padding: 15px; border-radius: 10px; margin-bottom: 15px; border-left: 5px solid var(--blue-main); }
+        
+        .lista-objetivos { max-height: 250px; overflow-y: auto; background: white; padding: 10px; border: 1px solid #ddd; border-radius: 8px; margin-top: 10px; }
+        .item-obj { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid #eee; font-size: 13px; cursor: pointer; }
+        .item-obj input { width: auto; margin-top: 3px; }
+
+        .btn-salvar { width: 100%; padding: 15px; background-color: var(--green-btn); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        .btn-salvar:disabled { background-color: #999; }
+        
+        .btn-voltar { display: block; text-align: center; margin-top: 15px; color: #666; text-decoration: none; font-size: 14px; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <div class="header" id="titulo">Novo Registro</div>
+    <div class="header">
+        <h1 id="titulo">REGISTRO PEDAGÓGICO</h1>
+    </div>
+
     <div class="content">
-        <div class="row">
-            <div class="col">
-                <label>Bimestre:</label>
-                <select id="bimestre">
-                    <option value="1º Bimestre">1º Bimestre</option>
-                    <option value="2º Bimestre">2º Bimestre</option>
-                    <option value="3º Bimestre">3º Bimestre</option>
-                    <option value="4º Bimestre">4º Bimestre</option>
-                </select>
-            </div>
-            <div class="col">
-                <label>Data:</label>
+        <div class="row-tripla">
+            <div>
+                <label>📅 DATA</label>
                 <input type="date" id="data">
             </div>
+            <div>
+                <label>🔢 PRÁTICAS </label>
+                <input type="number" id="numAulas" value="1">
+            </div>
+            <div>
+                <label>📊 BIMESTRE</label>
+                <select id="bimestre">
+                    <option value="1º Bimestre">1º BIMESTRE</option>
+                    <option value="2º Bimestre">2º BIMESTRE</option>
+                    <option value="3º Bimestre">3º BIMESTRE</option>
+                    <option value="4º Bimestre">4º BIMESTRE</option>
+                </select>
+            </div>
         </div>
 
-        <div class="campo-aulas">
-            <label style="color: #f57c00;">Quantidade de Aulas:</label>
-            <input type="number" id="numAulas" value="1">
+        <div class="campo-bncc">
+            <label>👶 MODALIDADE/ETAPA</label>
+            <select id="modalidade" onchange="popularCampos()">
+                <option value="">Carregando...</option>
+            </select>
+
+            <label style="margin-top:10px;">📍 CAMPO DE EXPERIÊNCIA</label>
+            <select id="campo" onchange="popularObjetivos()">
+                <option value="">Selecione a modalidade primeiro</option>
+            </select>
         </div>
 
-        <label>Modalidade:</label>
-        <select id="modalidade" onchange="popularCampos()"><option value="">Carregando...</option></select>
+        <label>🎯 OBJETIVOS DE APRENDIZAGEM (BNCC)</label>
+        <div class="lista-objetivos" id="listaObjetivos">
+            <p style="color:#999; text-align:center; font-size:12px;">Selecione um Campo de Experiência</p>
+        </div>
 
-        <label style="margin-top:15px;">Campo de Experiência:</label>
-        <select id="campo" onchange="popularObjetivos()"><option value="">Aguardando...</option></select>
+        <label style="margin-top:15px;">📚 SABERES E CONHECIMENTO</label>
+        <textarea id="metodologia" rows="3" placeholder="Descreva como foi a aula..."></textarea>
 
-        <label style="margin-top:15px;">Objetivo de Aprendizagem:</label>
-        <select id="objetivo"><option value="">Aguardando...</option></select>
+        <label style="margin-top:10px;">📝 METODOLOGIA/PROPOSTA ATIVA</label>
+        <textarea id="observacoes" rows="2" placeholder="Opcional..."></textarea>
 
-        <label style="margin-top:15px;">Metodologia/Atividade:</label>
-        <textarea id="metodologia"></textarea>
-
-        <label style="margin-top:15px;">Observações:</label>
-        <textarea id="observacoes"></textarea>
-
-        <button class="btn-salvar" id="btnSalvar" onclick="salvar()">Salvar Registro</button>
-        <a href="relatorio_professor.html" class="btn-cancelar" onclick="localStorage.removeItem('edit_dados')">CANCELAR</a>
+        <button class="btn-salvar" id="btnSalvar" onclick="salvar()">Gravar Registro</button>
+        <a href="menu.html" class="btn-voltar">↩️ Voltar ao Menu</a>
     </div>
 </div>
 
 <script>
-    const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbynk9WBrHEVOEWYAxyVbofldS4HIzbWVIESURDTs-qPP724Xv_NOXzTbp3h4TXqAPNeQA/exec'; 
+    const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbx_0g4gCIkeFAXBaAklRWFq5IZFOOtZKAzM6ln98XEqu8RyKLwDTOJ0av154nG6e6Becw/exec'; 
+    
     let referencias = [];
     let editID = null;
 
     window.onload = function() {
-        // 1. Carrega as referências da planilha primeiro
+        const params = new URLSearchParams(window.location.search);
+        const idDaUrl = params.get('editID');
+        
         fetch(URL_SCRIPT + '?tipo=referencias')
             .then(r => r.json())
             .then(data => {
                 referencias = data;
                 const mSel = document.getElementById('modalidade');
-                const mods = [...new Set(data.map(i => i.modalidade || i[0]))].filter(Boolean);
-                
+                const mods = [...new Set(data.map(i => i.modalidade))].filter(Boolean);
                 mSel.innerHTML = '<option value="">Selecione...</option>';
                 mods.sort().forEach(m => mSel.add(new Option(m, m)));
-
-                // 2. Só depois de carregar as listas, verifica se é uma edição
-                verificarEdicao();
+                
+                if (idDaUrl) {
+                    verificarEdicao(idDaUrl);
+                } else {
+                    editID = null;
+                    document.getElementById('titulo').innerText = "REGISTRO PEDAGÓGICO";
+                    document.getElementById('data').value = new Date().toISOString().split('T')[0];
+                }
             });
     };
 
     function popularCampos() {
         const mod = document.getElementById('modalidade').value;
-        const cSel = document.getElementById('campo');
-        cSel.innerHTML = '<option value="">Selecione...</option>';
-        const filtrados = referencias.filter(i => (i.modalidade || i[0]) === mod);
-        const unicos = [...new Set(filtrados.map(i => i.campo || i[1]))].filter(Boolean);
-        unicos.sort().forEach(c => cSel.add(new Option(c, c)));
+        const campoSel = document.getElementById('campo');
+        campoSel.innerHTML = '<option value="">Selecione o Campo...</option>';
+        
+        const campos = [...new Set(referencias.filter(i => i.modalidade === mod).map(i => i.campo))];
+        campos.forEach(c => campoSel.add(new Option(c, c)));
     }
 
     function popularObjetivos() {
         const mod = document.getElementById('modalidade').value;
-        const camp = document.getElementById('campo').value;
-        const oSel = document.getElementById('objetivo');
-        oSel.innerHTML = '<option value="">Selecione...</option>';
-        referencias.filter(i => (i.modalidade || i[0]) === mod && (i.campo || i[1]) === camp)
-            .forEach(i => {
-                const txt = i.objetivo || i[2];
-                if(txt) oSel.add(new Option(txt, txt));
-            });
+        const campo = document.getElementById('campo').value;
+        const lista = document.getElementById('listaObjetivos');
+        lista.innerHTML = "";
+
+        const filtrados = referencias.filter(i => i.modalidade === mod && i.campo === campo);
+        
+        filtrados.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.className = 'item-obj';
+            div.innerHTML = `
+                <input type="checkbox" name="obj_check" value="${item.objetivo}" id="obj${index}">
+                <label for="obj${index}" style="font-weight:normal; margin:0;">${item.objetivo}</label>
+            `;
+            div.onclick = (e) => {
+                if(e.target.tagName !== 'INPUT') {
+                    const cb = div.querySelector('input');
+                    cb.checked = !cb.checked;
+                }
+            };
+            lista.appendChild(div);
+        });
     }
 
-    function verificarEdicao() {
-        const cache = localStorage.getItem('edit_dados');
-        if (!cache) {
-            document.getElementById('data').value = new Date().toISOString().split('T')[0];
-            return;
-        }
+    function verificarEdicao(id) {
+        editID = id;
+        document.getElementById('titulo').innerText = "CORRIGIR REGISTRO";
+        const btn = document.getElementById('btnSalvar');
+        btn.innerText = "Buscando dados...";
+        btn.disabled = true;
 
-        const d = JSON.parse(cache);
-        editID = d.id;
-        document.getElementById('titulo').innerText = "Corrigir Registro";
-        document.getElementById('btnSalvar').innerText = "Atualizar Dados";
+        fetch(`${URL_SCRIPT}?tipo=buscar_por_id&id=${editID}`)
+            .then(r => r.json())
+            .then(d => {
+                if (d && !d.erro) {
+                    // Preenche campos básicos
+                    document.getElementById('data').value = d.data;
+                    document.getElementById('numAulas').value = d.numAulas || 1;
+                    document.getElementById('bimestre').value = d.bimestre;
+                    document.getElementById('metodologia').value = d.metodologia;
+                    document.getElementById('observacoes').value = d.observacoes || "";
+                    
+                    // Lógica para preencher selects encadeados
+                    const modEncontrada = referencias.find(r => r.campo === d.campo)?.modalidade || "";
+                    document.getElementById('modalidade').value = modEncontrada;
+                    
+                    popularCampos();
+                    document.getElementById('campo').value = d.campo || "";
+                    
+                    popularObjetivos();
 
-        // Preenche campos de texto e data
-        document.getElementById('bimestre').value = d.bimestre;
-        document.getElementById('numAulas').value = d.numAulas || 1;
-        document.getElementById('metodologia').value = d.metodologia;
-        document.getElementById('observacoes').value = d.observacoes || "";
-        
-        if(d.data.includes('/')) {
-            const p = d.data.split('/');
-            document.getElementById('data').value = `${p[2]}-${p[1]}-${p[0]}`;
-        } else {
-            document.getElementById('data').value = d.data;
-        }
-
-        // Preenche os Selects em ordem (Cascata)
-        document.getElementById('modalidade').value = d.modalidade || "";
-        popularCampos();
-        document.getElementById('campo').value = d.campo || "";
-        popularObjetivos();
-        document.getElementById('objetivo').value = d.objetivo || "";
+                    // Marca os checkboxes dos objetivos salvos
+                    setTimeout(() => {
+                        const salvos = (d.objetivo || "").split('; ');
+                        const checks = document.getElementsByName('obj_check');
+                        checks.forEach(c => { if(salvos.includes(c.value)) c.checked = true; });
+                        
+                        btn.innerText = "Gravar Alterações";
+                        btn.disabled = false;
+                    }, 500);
+                } else {
+                    alert("Registro não encontrado para edição.");
+                    btn.innerText = "Gravar Registro";
+                    btn.disabled = false;
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Erro ao buscar dados do registro.");
+            });
     }
 
     function salvar() {
         const btn = document.getElementById('btnSalvar');
+        const selecionados = Array.from(document.getElementsByName('obj_check'))
+                                  .filter(c => c.checked)
+                                  .map(c => c.value);
+
+        if (selecionados.length === 0) { alert("Selecione ao menos um objetivo!"); return; }
+
         btn.disabled = true;
-        btn.innerText = "Salvando...";
+        btn.innerText = "Gravando...";
 
-        const params = new URLSearchParams({
-            acao: 'salvar_infantil',
-            id: editID || "", 
-            bimestre: document.getElementById('bimestre').value,
-            numAulas: document.getElementById('numAulas').value,
-            data: document.getElementById('data').value,
-            professor: localStorage.getItem('user_nome'),
-            escola: localStorage.getItem('user_escola'),
-            turma: localStorage.getItem('user_turma'),
-            turno: localStorage.getItem('user_turno'),
-            modalidade: document.getElementById('modalidade').value,
-            campo: document.getElementById('campo').value,
-            objetivos: document.getElementById('objetivo').value,
-            metodologia: document.getElementById('metodologia').value,
-            observacoes: document.getElementById('observacoes').value
-        });
+        const formData = new FormData();
+        formData.append("acao", "salvar_infantil");
+        formData.append("id", editID || "");
+        formData.append("professor", localStorage.getItem('user_nome'));
+        formData.append("escola", localStorage.getItem('user_escola'));
+        formData.append("turma", localStorage.getItem('user_turma'));
+        formData.append("turno", localStorage.getItem('user_turno'));
+        formData.append("data", document.getElementById('data').value);
+        formData.append("numAulas", document.getElementById('numAulas').value);
+        formData.append("bimestre", document.getElementById('bimestre').value);
+        formData.append("campo", document.getElementById('campo').value);
+        formData.append("objetivos", selecionados.join('; '));
+        formData.append("metodologia", document.getElementById('metodologia').value);
+        formData.append("observacoes", document.getElementById('observacoes').value);
 
-        fetch(URL_SCRIPT, { method: 'POST', body: params, mode: 'no-cors' })
+        fetch(URL_SCRIPT, { method: 'POST', body: formData, mode: 'no-cors' })
             .then(() => {
-                alert("Registro atualizado!");
-                localStorage.removeItem('edit_dados');
-                window.location.href = "relatorio_professor.html";
+                alert("✅ Registro gravado com sucesso!");
+                
+                editID = null; 
+                document.getElementById('titulo').innerText = "REGISTRO PEDAGÓGICO";
+                btn.innerText = "Gravar Registro";
+                btn.disabled = false;
+
+                // Limpa checkboxes e foca na metodologia
+                Array.from(document.getElementsByName('obj_check')).forEach(c => c.checked = false);
+                document.getElementById('metodologia').focus();
+            })
+            .catch(() => {
+                alert("❌ Erro ao conectar.");
+                btn.disabled = false;
+                btn.innerText = "Gravar Registro";
             });
     }
 </script>
+
 </body>
 </html>

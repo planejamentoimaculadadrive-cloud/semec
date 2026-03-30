@@ -6,114 +6,152 @@
     <title>Menu Principal - Diário Digital</title>
     <style>
         :root {
-            --blue: #1a73e8;
-            --green: #1e8e3e;
-            --purple: #673ab7;
-            --red: #d93025;
-            --bg: #f8f9fa;
+            --primary: #1a73e8;
+            --success: #1e8e3e;
+            --warning: #f9ab00;
+            --danger: #d93025;
+            --bg: #f0f2f5;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             background-color: var(--bg);
+            margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
+            min-height: 100vh;
         }
 
         .menu-container {
-            background-color: white;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             width: 100%;
-            max-width: 400px;
+            max-width: 450px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* Cabeçalho de Boas-vindas */
+        .welcome-header {
             text-align: center;
+            margin-bottom: 30px;
         }
 
-        .user-info {
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .user-info h2 {
+        .welcome-header h2 {
             margin: 0;
-            color: var(--blue);
-            font-size: 22px;
+            color: #333;
+            font-size: 24px;
         }
 
-        .user-info p {
+        .welcome-header p {
             margin: 5px 0 0;
             color: #666;
             font-size: 14px;
+            font-weight: 500;
         }
 
-        .btn-list {
+        /* Grade de Botões em Formato de Card */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Dois por linha */
+            gap: 15px;
+        }
+
+        .menu-card {
+            background: white;
+            border: none;
+            border-radius: 20px;
+            padding: 25px 15px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
-        }
-
-        .btn {
-            width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: 12px;
-            font-size: 15px;
-            font-weight: bold;
-            color: white;
-            cursor: pointer;
-            text-transform: uppercase;
-            transition: transform 0.2s, opacity 0.2s;
-            display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
         }
 
-        .btn:active {
-            transform: scale(0.98);
+        .menu-card:active {
+            transform: scale(0.95);
+            background-color: #f8f9fa;
         }
 
-        .btn-new { background-color: var(--green); }
-        .btn-reports { background-color: var(--blue); }
-        .btn-stats { background-color: var(--purple); }
-        .btn-logout { background-color: var(--red); margin-top: 10px; }
+        .menu-card .icon {
+            font-size: 32px;
+            margin-bottom: 5px;
+        }
+
+        .menu-card span {
+            font-size: 12px;
+            font-weight: bold;
+            color: #444;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-align: center;
+        }
+
+        /* Cores dos Ícones e Destaques */
+        .card-new .icon { color: var(--success); }
+        .card-reports .icon { color: var(--primary); }
+        .card-stats .icon { color: var(--warning); }
+        
+        /* Botão de Sair em destaque na parte inferior */
+        .logout-area {
+            margin-top: 30px;
+            text-align: center;
+        }
 
         .btn-logout {
-            background-color: white;
-            color: var(--red);
-            border: 2px solid var(--red);
+            background: none;
+            border: 1px solid #ccc;
+            color: #888;
+            padding: 10px 25px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-logout:hover {
+            background-color: var(--danger);
+            color: white;
+            border-color: var(--danger);
         }
     </style>
 </head>
 <body>
 
 <div class="menu-container">
-    <div class="user-info">
-        <h2 id="userName">Bem-vindo(a)</h2>
-        <p id="userSchool">Carregando escola...</p>
+    <div class="welcome-header">
+        <h2 id="userName">Olá, Professor(a)</h2>
+        <p id="userSchool">Nome da Escola</p>
     </div>
 
-    <div class="btn-list">
-        <button class="btn btn-new" onclick="window.location.href='formulario_infantil.html'">
-            📝 NOVO REGISTRO
+    <div class="menu-grid">
+        <button class="menu-card card-new" onclick="window.location.href='formulario_infantil.html'">
+            <div class="icon">📝</div>
+            <span>Novo<br>Registro</span>
         </button>
 
-        <button class="btn btn-reports" onclick="window.location.href='relatorio_professor.html'">
-            📂 MEUS REGISTROS
+        <button class="menu-card card-reports" onclick="window.location.href='relatorio_professor.html'">
+            <div class="icon">📂</div>
+            <span>Meus<br>Lançamentos</span>
         </button>
 
-        <button class="btn btn-stats" onclick="window.location.href='minhas_estatisticas.html'">
-            📊 MINHAS ESTATÍSTICAS
+        <button class="menu-card card-stats" onclick="window.location.href='minhas_estatisticas.html'">
+            <div class="icon">📊</div>
+            <span>Minhas<br>Estatísticas</span>
         </button>
 
-        <button class="btn btn-logout" onclick="fazerLogout()">
-            SAIR
+        <button class="menu-card" onclick="alert('Funcionalidade em breve!')">
+            <div class="icon">👤</div>
+            <span>Meu<br>Perfil</span>
         </button>
+    </div>
+
+    <div class="logout-area">
+        <button class="btn-logout" onclick="fazerLogout()">SAIR DO SISTEMA</button>
     </div>
 </div>
 
@@ -123,11 +161,13 @@
         const escola = localStorage.getItem('user_escola');
         
         if (!nome) {
-            window.location.href = 'index.html'; // Volta para o login se não houver dados
+            window.location.href = 'index.html';
             return;
         }
 
-        document.getElementById('userName').innerText = "Olá, " + nome;
+        // Formata o nome para exibir apenas o primeiro
+        const primeiroNome = nome.split(' ')[0];
+        document.getElementById('userName').innerText = "Olá, " + primeiroNome;
         document.getElementById('userSchool').innerText = escola;
     };
 

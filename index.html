@@ -18,9 +18,8 @@
             text-align: center; 
         }
 
-        /* Ajuste das Logos para não quebrarem */
-        .logo-superior { width: 100%; max-width: 80px; height: auto; margin-bottom: 20px; display: block; margin-left: auto; margin-right: auto; }
-        .logo-inferior { width: 100%; max-width: 80px; height: auto; margin-top: 25px; display: block; margin-left: auto; margin-right: auto; }
+        .logo-superior { width: 100%; max-width: 150px; height: auto; margin-bottom: 20px; display: block; margin-left: auto; margin-right: auto; opacity: 0.8; }
+        .logo-Desenvolvedor { width: 100%; max-width: 50px; height: auto; display: block; margin: 15px auto 5px auto; }
 
         h2 { color: var(--blue); margin-bottom: 20px; font-size: 18px; text-transform: uppercase; }
         label { display: block; text-align: left; font-size: 11px; font-weight: bold; color: #666; margin-bottom: 5px; text-transform: uppercase; }
@@ -36,6 +35,13 @@
             box-sizing: border-box;
         }
 
+        /* NOVA REGRA: Coloca Turma e Turno lado a lado */
+        .row-dupla {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
         .btn-login { 
             background: var(--blue); 
             color: white; 
@@ -46,24 +52,21 @@
             font-weight: bold; 
             cursor: pointer; 
             font-size: 16px;
+            margin-top: 5px;
         }
 
-        .footer-creditos { 
-            font-size: 9px; 
-            color: #bbb; 
-            margin-top: 5px; 
-            letter-spacing: 0.5px;
-        }
-
+        .dev-container { margin-top: 20px; padding-top: 10px; border-top: 1px solid #eee; }
+        .credito { font-size: 10px; color: #888; margin: 0; letter-spacing: 0.5px; }
         #loading { color: var(--blue); font-size: 13px; margin-bottom: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="login-card">
-    <img src="https://lh3.googleusercontent.com/d/1bs3UnnKGaz158PfAwzPVTq1DJ-YVRpEb" class="logo-superior" alt="Logo Superior">
+    <img src="https://lh3.googleusercontent.com/d/1VotgpjdCZ0UreMOYpos9_wtkhvwnEZ92" class="logo-superior" alt="Logo Superior">
     
-    <h2>Acesso ao Sistema</h2>
+    <h2>Sistema Pedagógico</h2>
+        <p>Planejamento de Aulas 2026</p>
     <div id="loading">Sincronizando dados...</div>
 
     <label>Selecione a Escola</label>
@@ -72,24 +75,29 @@
     <label>Selecione seu Nome</label>
     <select id="selProfessor"><option value="">Carregando...</option></select>
 
-    <label>Selecione a Turma</label>
-    <select id="selTurma"><option value="">Carregando...</option></select>
-
-    <label>Selecione o Turno</label>
-    <select id="selTurno"><option value="">Carregando...</option></select>
-
+    <div class="row-dupla">
+        <div>
+            <label>Turma</label>
+            <select id="selTurma"><option value="">Aguardando...</option></select>
+        </div>
+        <div>
+            <label>Turno</label>
+            <select id="selTurno"><option value="">Aguardando...</option></select>
+        </div>
+    </div>
     <label>Senha</label>
     <input type="password" id="senha" placeholder="Sua senha">
 
     <button class="btn-login" onclick="realizarLogin()">ENTRAR NO DIÁRIO</button>
 
-    <img src="https://lh3.googleusercontent.com/d/1RVXMPATKTdUxYLosq3n1SkJ_3dkIU_Kp" class="logo-inferior" alt="Logo Inferior">
-
-    <div class="footer-creditos">@Erivaldo Silva</div>
+    <div class="dev-container"> 
+        <img src="https://lh3.googleusercontent.com/u/0/d/1WYPSaHqtqs8On1ikFot8z6r4q5gfBf4p" alt="Logo do Desenvolvedor" class="logo-Desenvolvedor">
+        <p class="credito">v1 - Desenvolvida por: @Erivaldo Silva.</p> 
+    </div>
 </div>
 
 <script>
-    const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbx3uBXdfBeg2arfTG6Ge7pJQ8gG4Yc6ctBQwt3bxunCnTG3pcc-aDlI-xh6tYpWPSZfgQ/exec'; 
+    const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbx_0g4gCIkeFAXBaAklRWFq5IZFOOtZKAzM6ln98XEqu8RyKLwDTOJ0av154nG6e6Becw/exec'; 
     let dadosPlanilha = { professores: [] };
 
     window.onload = function() {
@@ -101,7 +109,11 @@
                 
                 const selProf = document.getElementById('selProfessor');
                 selProf.innerHTML = '<option value="">Escolha seu nome...</option>';
-                data.professores.forEach(p => selProf.add(new Option(p.nome, p.nome)));
+                
+                data.professores.forEach(p => {
+                    let nomeExibir = (typeof p === 'object') ? p.nome : p;
+                    if(nomeExibir) selProf.add(new Option(nomeExibir, nomeExibir));
+                });
 
                 popularSelect('selTurma', data.turmas);
                 popularSelect('selTurno', data.turnos);
@@ -115,7 +127,7 @@
     function popularSelect(id, lista) {
         const sel = document.getElementById(id);
         sel.innerHTML = '<option value="">Selecione...</option>';
-        lista.forEach(item => sel.add(new Option(item, item)));
+        if(lista) lista.forEach(item => { if(item) sel.add(new Option(item, item)); });
     }
 
     function realizarLogin() {
@@ -127,13 +139,14 @@
 
         if (!profNome || !senha) { alert("Preencha os campos!"); return; }
 
-        const professor = dadosPlanilha.professores.find(p => p.nome === profNome);
-        if (professor && professor.senha === senha) {
-            localStorage.setItem('user_nome', professor.nome);
+        const professor = dadosPlanilha.professores.find(p => (p.nome || p) === profNome);
+        
+        if (professor && (professor.senha === senha || !professor.senha)) {
+            localStorage.setItem('user_nome', profNome);
             localStorage.setItem('user_escola', escola);
             localStorage.setItem('user_turma', turma);
             localStorage.setItem('user_turno', turno);
-            localStorage.setItem('user_modalidade', professor.modalidade); 
+            localStorage.setItem('user_modalidade', professor.modalidade || ""); 
             window.location.href = 'menu.html';
         } else {
             alert("Senha incorreta!");

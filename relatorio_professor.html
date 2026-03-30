@@ -3,174 +3,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meus Lançamentos - Diário Digital</title>
+    <title>Relatório de Lançamentos - Diário Digital</title>
     <style>
         :root { 
             --blue: #1a73e8; 
-            --red: #d93025; 
-            --yellow: #fbbc04; 
+            --green: #1e8e3e;
             --gray: #5f6368; 
+            --bg: #f1f3f4;
         }
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 15px; }
-        .container { max-width: 600px; margin: auto; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #3c4043; }
+        .container { max-width: 650px; margin: auto; }
         
-        .header { background: var(--blue); color: white; padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .header { background: var(--blue); color: white; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .header h2 { margin: 0; font-size: 20px; text-transform: uppercase; }
         
-        /* Botão Voltar no Topo */
-        .btn-voltar-topo { 
-            display: block; 
-            width: 100%; 
-            padding: 12px; 
-            background: var(--gray); 
-            color: white; 
-            text-align: center; 
-            text-decoration: none; 
-            border-radius: 10px; 
-            margin-bottom: 20px; 
-            font-weight: bold; 
-            box-sizing: border-box;
-            font-size: 14px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        .btn-voltar { 
+            display: block; width: 100%; padding: 12px; background: white; color: var(--gray); 
+            text-align: center; text-decoration: none; border-radius: 10px; margin-bottom: 15px; 
+            font-weight: bold; box-sizing: border-box; font-size: 14px; border: 1px solid #ddd;
         }
 
-        .busca-container { margin-bottom: 20px; }
-        #inputBusca { 
-            width: 100%; 
-            padding: 15px; 
-            border-radius: 10px; 
-            border: 2px solid #ddd; 
-            font-size: 16px; 
-            box-sizing: border-box;
-            outline: none;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-        #inputBusca:focus { border-color: var(--blue); }
+        .search-box { width: 100%; padding: 12px 15px; border-radius: 10px; border: 1px solid #dadce0; font-size: 16px; margin-bottom: 15px; box-sizing: border-box; outline: none; }
+        .btn-sync { background: white; color: var(--blue); border: 1px solid var(--blue); padding: 10px; border-radius: 10px; width: 100%; font-weight: bold; cursor: pointer; margin-bottom: 20px; }
 
         .card { 
-            background: white; margin-bottom: 15px; padding: 15px; border-radius: 10px; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-left: 5px solid var(--blue);
-            display: flex; flex-direction: column;
+            background: white; border-radius: 12px; padding: 18px; margin-bottom: 15px; 
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05); border-left: 6px solid var(--blue);
+            cursor: pointer; user-select: none; transition: 0.3s;
         }
+        .card.aberto { border-left-color: var(--green); }
         
-        .topo-card { display: flex; justify-content: space-between; font-weight: bold; font-size: 13px; color: var(--gray); border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 10px; }
+        .card-header { display: flex; justify-content: space-between; font-weight: bold; color: var(--blue); font-size: 13px; margin-bottom: 10px; border-bottom: 1px solid #f1f1f1; padding-bottom: 8px; }
         
-        /* Layout dos Botões: Alinhados à Esquerda e Empilhados */
-        .acoes { 
-            display: flex; 
-            flex-direction: column; 
-            align-items: flex-start; 
-            gap: 10px; 
-            margin-top: 15px; 
-            width: 100%;
-        }
+        .info-linha { font-size: 14px; margin: 5px 0; }
+        .info-linha b { color: var(--blue); font-size: 12px; text-transform: uppercase; }
         
-        .btn { 
-            border: none; 
-            padding: 12px 20px; 
-            border-radius: 8px; 
-            color: white; 
-            font-weight: bold; 
-            cursor: pointer; 
-            text-transform: uppercase; 
-            font-size: 11px; 
-            width: 200px; 
-            text-align: left; 
-        }
-        
-        .btn-edit { background: var(--yellow); color: #000; }
-        .btn-pdf { background: var(--blue); }
-        .btn-del { background: var(--red); }
-        
-        #loader { text-align: center; padding: 30px; color: var(--blue); font-weight: bold; }
+        .conteudo-expansivel { display: none; margin-top: 15px; padding-top: 10px; border-top: 1px dashed #ddd; }
+        .card.aberto .conteudo-expansivel { display: block; }
+
+        .bloco-texto { background: #f9f9f9; padding: 10px; border-radius: 8px; font-size: 13px; color: #444; margin-bottom: 10px; white-space: pre-wrap; border: 1px solid #eee; }
+
+        .acoes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; }
+        .btn-acao { border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px; text-align: center; }
+        .btn-edit { background: #e8f0fe; color: #1967d2; }
+        .btn-pdf { background: #e6f4ea; color: #137333; }
+
+        #loading { text-align: center; padding: 30px; font-weight: bold; color: var(--gray); }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <h2 style="margin:0">Meus Lançamentos</h2>
-        <span id="txtProf">Carregando...</span>
+        <h2>Meus Lançamentos</h2>
+        <div id="infoUser" style="font-size:12px; margin-top:5px; opacity:0.9">Carregando...</div>
     </div>
 
-    <a href="menu.html" class="btn-voltar-topo">⬅ VOLTAR AO MENU</a>
+    <a href="menu.html" class="btn-voltar">⬅ VOLTAR AO MENU</a>
 
-    <div class="busca-container">
-        <input type="text" id="inputBusca" onkeyup="filtrarRegistros()" placeholder="🔍 Buscar por escola, data ou conteúdo...">
-    </div>
+    <button class="btn-sync" onclick="buscarDados()">🔄 ATUALIZAR LISTA</button>
+    
+    <div style="font-size: 10px; text-align: center; color: #888; margin-bottom: 10px;">💡 Dois cliques para expandir o card</div>
 
-    <div id="loader">Buscando seus registros...</div>
+    <input type="text" class="search-box" id="busca" placeholder="Filtrar por escola, data ou professor..." onkeyup="filtrar()">
+
+    <div id="loading">Buscando na aba REGISTRO_INFANTIL...</div>
     <div id="lista"></div>
 </div>
 
 <script>
-    const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbynk9WBrHEVOEWYAxyVbofldS4HIzbWVIESURDTs-qPP724Xv_NOXzTbp3h4TXqAPNeQA/exec'; 
-    const profLogado = localStorage.getItem('user_nome');
-    document.getElementById('txtProf').innerText = "Prof(a): " + (profLogado || "");
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx_0g4gCIkeFAXBaAklRWFq5IZFOOtZKAzM6ln98XEqu8RyKLwDTOJ0av154nG6e6Becw/exec';
+    const NOME_PROFESSOR = localStorage.getItem('user_nome');
 
-    window.onload = () => { if(!profLogado) window.location.href='index.html'; carregar(); };
+    window.onload = () => {
+        if(!NOME_PROFESSOR) { window.location.href = 'index.html'; return; }
+        document.getElementById('infoUser').innerText = "Professor(a): " + NOME_PROFESSOR;
+        buscarDados();
+    };
 
-    function carregar() {
-        fetch(`${URL_SCRIPT}?tipo=ler_registros&professor=${encodeURIComponent(profLogado)}`)
+    function buscarDados() {
+        const loading = document.getElementById('loading');
+        const lista = document.getElementById('lista');
+        loading.style.display = 'block';
+        lista.innerHTML = '';
+
+        fetch(`${SCRIPT_URL}?tipo=ler_registros&professor=${encodeURIComponent(NOME_PROFESSOR)}&nocache=${new Date().getTime()}`)
             .then(r => r.json())
-            .then(data => {
-                document.getElementById('loader').style.display = 'none';
-                renderizarLista(data);
+            .then(dados => {
+                loading.style.display = 'none';
+                renderizar(dados);
             });
     }
 
-    function renderizarLista(data) {
-        const list = document.getElementById('lista');
-        list.innerHTML = "";
-
-        if (!data || data.length === 0) {
-            list.innerHTML = "<div style='text-align:center; padding:20px; background:white; border-radius:10px;'>Nenhum registro encontrado.</div>";
-            return;
-        }
-
-        data.forEach(reg => {
+    function renderizar(dados) {
+        const lista = document.getElementById('lista');
+        dados.forEach(item => {
             const card = document.createElement('div');
             card.className = 'card';
-            card.setAttribute('data-info', `${reg.escola} ${reg.data} ${reg.campo} ${reg.bimestre}`.toLowerCase());
+            card.ondblclick = () => card.classList.toggle('aberto');
             
             card.innerHTML = `
-                <div class="topo-card"><span>📅 ${reg.data}</span><span>${reg.bimestre}</span></div>
-                <div style="font-size:14px;">
-                    <p><b>Escola:</b> ${reg.escola}</p>
-                    <p><b>Aulas:</b> ${reg.numAulas} H/A</p>
-                    <p><b>Campo:</b> ${reg.campo}</p>
+                <div class="card-header">
+                    <span>📅 DATA: ${formatarData(item.data)}</span>
+                    <span>BIMESTRE: ${item.bimestre}</span>
                 </div>
-                <div class="acoes">
-                    <button class="btn btn-edit" onclick='editar(${JSON.stringify(reg)})'>📝 Corrigir Registro</button>
-                    <button class="btn btn-pdf" onclick='gerarPDF(${JSON.stringify(reg)})'>📄 Imprimir / PDF</button>
-                    <button class="btn btn-del" onclick="excluir('${reg.id}')">🗑️ Excluir Registro</button>
+                <div class="info-linha"><b>PROFESSOR:</b> ${item.professor}</div>
+                <div class="info-linha"><b>ESCOLA:</b> ${item.escola}</div>
+                <div class="info-linha"><b>TURMA/TURNO:</b> ${item.turma} - ${item.turno}</div>
+                <div class="info-linha"><b>PRÁTICAS:</b> ${item.numAulas}</div>
+                <div class="info-linha"><b>CAMPOS DE EXPERIÊNCIA:</b> ${item.campo}</div>
+
+                <div class="conteudo-expansivel">
+                    <b>OBJETIVOS DE CONHECIMENTO:</b>
+                    <div class="bloco-texto">${item.objetivo}</div>
+                    <b>METODOLOGIA E PROPOSTA ATIVA:</b>
+                    <div class="bloco-texto">${item.metodologia}</div>
+                    ${item.observacoes ? `<b>OBSERVAÇÕES:</b><div class="bloco-texto">${item.observacoes}</div>` : ''}
                 </div>
+
+               <div class="acoes">
+    <button class="btn-acao btn-edit" onclick="editar('${item.id}')">✏️ EDITAR</button>
+    <button class="btn-acao btn-pdf" onclick='gerarPDF(event, ${JSON.stringify(item)})'>📄 PDF</button>
+</div>
             `;
-            list.appendChild(card);
+            lista.appendChild(card);
         });
     }
 
-    function filtrarRegistros() {
-        const termo = document.getElementById('inputBusca').value.toLowerCase();
+    function formatarData(data) {
+        if(!data) return "";
+        const p = data.split('-');
+        return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : data;
+    }
+
+    function filtrar() {
+        const termo = document.getElementById('busca').value.toLowerCase();
         const cards = document.getElementsByClassName('card');
-        for (let i = 0; i < cards.length; i++) {
-            const info = cards[i].getAttribute('data-info');
-            cards[i].style.display = info.includes(termo) ? "" : "none";
-        }
+        Array.from(cards).forEach(c => {
+            c.style.display = c.innerText.toLowerCase().includes(termo) ? '' : 'none';
+        });
     }
 
-    function editar(dados) {
-        localStorage.setItem('edit_dados', JSON.stringify(dados));
-        window.location.href = 'formulario_infantil.html';
-    }
+    function editar(id) { window.location.href = `formulario_infantil.html?editID=${id}`; }
 
-    function excluir(id) {
-        if(confirm("Deseja excluir permanentemente este registro?")) {
-            fetch(`${URL_SCRIPT}?acao=excluir&id=${id}`, {mode:'no-cors'}).then(() => location.reload());
-        }
-    }
-
-    function gerarPDF(dados) {
-        const logosEscolas = {
+    function gerarPDF(event, dados) {
+        if(event) event.stopPropagation();
+        const win = window.open('', '_blank');
+        
+        const logos = {
             "EMEIF MARIA MADALENA TORRES DANTAS": "https://lh3.googleusercontent.com/d/1m2edYTssohJHNbAsH6faLpD-EPiOFySV",
             "EMEIF JOÃO GONÇALVES DA SILVA": "https://lh3.googleusercontent.com/d/1Azxwq1p2gHmOOJGUeKfIS0bqYGpnypcf",
             "EMEIF JOSÉ ALVES SABINO": "https://lh3.googleusercontent.com/d/1CXvXM9S0DOtG5qglCTMW6ieNGthmRmhK",
@@ -180,40 +160,78 @@
             "ESCOLA JARDIM DE DEUS AÇÃO EVANGELICA": "https://lh3.googleusercontent.com/d/1RWc8dAv73W9drrvqG44vHSNMS_RRxFh2"
         };
 
-        const linkLogo = logosEscolas[dados.escola] || "";
+        const logoUrl = logos[dados.escola] || "";
 
-        const win = window.open('', '', 'width=850,height=900');
         win.document.write(`
             <html>
             <head>
                 <style>
-                    body { font-family: sans-serif; padding: 40px; color: #333; line-height: 1.5; }
-                    .header-pdf { text-align: center; border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 20px; }
-                    .logo { max-width: 280px; max-height: 120px; margin-bottom: 10px; }
-                    .box-info { background: #f2f2f2; padding: 15px; border-radius: 5px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; font-size: 13px; }
-                    .secao { border: 1px solid #ddd; padding: 12px; margin-bottom: 10px; border-radius: 5px; }
-                    .label { font-weight: bold; color: #1a73e8; font-size: 11px; text-transform: uppercase; display: block; }
+                    body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; color: #333; line-height: 1.6; }
+                    .header-pdf { text-align: center; border-bottom: 3px solid #1a73e8; padding-bottom: 15px; margin-bottom: 25px; }
+                    .logo { max-height: 80px; margin-bottom: 10px; }
+                    .title { font-size: 18px; font-weight: bold; color: #1a73e8; }
+                    
+                    .grid-info { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; border: 1px solid #eee; padding: 15px; border-radius: 8px; background: #fcfcfc; }
+                    .info-item { font-size: 12px; }
+                    .info-item b { color: #1a73e8; text-transform: uppercase; font-size: 10px; display: block; }
+                    
+                    .secao { margin-top: 20px; }
+                    .secao-titulo { font-weight: bold; font-size: 11px; color: #1a73e8; text-transform: uppercase; border-bottom: 1px solid #1a73e8; margin-bottom: 8px; }
+                    .secao-conteudo { font-size: 13px; text-align: justify; white-space: pre-wrap; padding: 5px 0 15px 0; }
+                    
+                    .footer { margin-top: 50px; display: flex; justify-content: space-around; text-align: center; font-size: 10px; }
+                    .assinatura { border-top: 1px solid #999; width: 200px; padding-top: 5px; }
                 </style>
             </head>
             <body>
                 <div class="header-pdf">
-                    ${linkLogo ? `<img src="${linkLogo}" class="logo">` : ''}
-                    <div style="font-weight:bold; font-size:18px;">Relatório de Registro Pedagógico</div>
+                    ${logoUrl ? `<img src="${logoUrl}" class="logo"><br>` : ''}
+                    <div class="title">PLANEJAMENTO PEDAGÓGICO</div>
                 </div>
-                <div class="box-info">
-                    <div><b>Escola:</b> ${dados.escola}</div>
-                    <div><b>Data:</b> ${dados.data}</div>
-                    <div><b>Professor(a):</b> ${dados.professor}</div>
-                    <div><b>Bimestre:</b> ${dados.bimestre}</div>
-                    <div><b>Turma/Turno:</b> ${dados.turma} (${dados.turno})</div>
-                    <div><b>Aulas:</b> ${dados.numAulas} H/A</div>
+
+                <div class="grid-info">
+                    <div class="info-item"><b>Bimestre</b>${dados.bimestre}</div>
+                    <div class="info-item"><b>Data</b>${formatarData(dados.data)}</div>
+                    <div class="info-item"><b>Professor</b>${dados.professor}</div>
+                    <div class="info-item"><b>Práticas</b>${dados.numAulas}</div>
+                    <div class="info-item" style="grid-column: span 2"><b>Escola</b>${dados.escola}</div>
+                    <div class="info-item"><b>Turma</b>${dados.turma}</div>
+                    <div class="info-item"><b>Turno</b>${dados.turno}</div>
                 </div>
-                <div class="secao"><span class="label">Campo de Experiência</span>${dados.campo}</div>
-                <div class="secao"><span class="label">Objetivo de Aprendizagem</span>${dados.objetivo}</div>
-                <div class="secao"><span class="label">Metodologia</span>${dados.metodologia}</div>
-                ${dados.observacoes ? `<div class="secao"><span class="label">Observações</span>${dados.observacoes}</div>` : ''}
-                <div style="margin-top:50px; text-align:center;">__________________________________<br>Assinatura do Professor(a)</div>
-                <script>window.onload = () => { setTimeout(() => { window.print(); }, 1200); };<\/script>
+
+                <div class="secao">
+                    <div class="secao-titulo">CAMPOS DE EXPERIÊNCIA</div>
+                    <div class="secao-conteudo">${dados.campo}</div>
+                </div>
+
+                <div class="secao">
+                    <div class="secao-titulo">OBJETIVOS DE CONHECIMENTO</div>
+                    <div class="secao-conteudo">${dados.objetivo}</div>
+                </div>
+
+                <div class="secao">
+                    <div class="secao-titulo">METODOLOGIA E PROPOSTA ATIVA</div>
+                    <div class="secao-conteudo">${dados.metodologia}</div>
+                </div>
+
+                ${dados.observacoes ? `
+                <div class="secao">
+                    <div class="secao-titulo">OBSERVAÇÕES</div>
+                    <div class="secao-conteudo">${dados.observacoes}</div>
+                </div>` : ''}
+
+                <div class="footer">
+                    <div class="assinatura">Professor(a)</div>
+                    <div class="assinatura">Coordenação / Direção</div>
+                </div>
+
+                <script>
+                    window.onload = function() {
+                        window.print();
+                        setTimeout(function() { window.close(); }, 500);
+                    };
+                    window.onafterprint = function() { window.close(); };
+                <\/script>
             </body>
             </html>
         `);
