@@ -92,7 +92,7 @@
 </div>
 
 <script>
-    const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbx_0g4gCIkeFAXBaAklRWFq5IZFOOtZKAzM6ln98XEqu8RyKLwDTOJ0av154nG6e6Becw/exec'; 
+    const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbxdQht0Ek7Y8o8p8QUbhynYK2yAhw0mXhwjYE6Dt7er9CYBtAgJCjXacntEXYcKTDLkNQ/exec'; 
     
     let referencias = [];
     let editID = null;
@@ -154,34 +154,35 @@
         });
     }
 
-    function verificarEdicao(id) {
+ function verificarEdicao(id) {
         editID = id;
         document.getElementById('titulo').innerText = "CORRIGIR REGISTRO";
         const btn = document.getElementById('btnSalvar');
         btn.innerText = "Buscando dados...";
         btn.disabled = true;
 
-        fetch(`${URL_SCRIPT}?tipo=buscar_por_id&id=${editID}`)
+        // Adicionamos &nocache=... para forçar o script a ignorar versões antigas
+        fetch(`${URL_SCRIPT}?tipo=buscar_por_id&id=${id}&nocache=${new Date().getTime()}`)
             .then(r => r.json())
             .then(d => {
                 if (d && !d.erro) {
-                    // Preenche campos básicos
                     document.getElementById('data').value = d.data;
                     document.getElementById('numAulas').value = d.numAulas || 1;
                     document.getElementById('bimestre').value = d.bimestre;
                     document.getElementById('metodologia').value = d.metodologia;
                     document.getElementById('observacoes').value = d.observacoes || "";
                     
-                    // Lógica para preencher selects encadeados
-                    const modEncontrada = referencias.find(r => r.campo === d.campo)?.modalidade || "";
-                    document.getElementById('modalidade').value = modEncontrada;
-                    
-                    popularCampos();
-                    document.getElementById('campo').value = d.campo || "";
-                    
-                    popularObjetivos();
+                    // Preenche modalidade e campos
+                    const mSel = document.getElementById('modalidade');
+                    // Tenta encontrar a modalidade nas referências
+                    const itemRef = referencias.find(r => r.campo === d.campo);
+                    if(itemRef) {
+                        mSel.value = itemRef.modalidade;
+                        popularCampos();
+                        document.getElementById('campo').value = d.campo;
+                        popularObjetivos();
+                    }
 
-                    // Marca os checkboxes dos objetivos salvos
                     setTimeout(() => {
                         const salvos = (d.objetivo || "").split('; ');
                         const checks = document.getElementsByName('obj_check');
@@ -189,16 +190,16 @@
                         
                         btn.innerText = "Gravar Alterações";
                         btn.disabled = false;
-                    }, 500);
+                    }, 600);
                 } else {
-                    alert("Registro não encontrado para edição.");
+                    alert("Erro: " + (d.erro || "Registro não encontrado"));
                     btn.innerText = "Gravar Registro";
                     btn.disabled = false;
                 }
             })
             .catch(err => {
-                console.error(err);
-                alert("Erro ao buscar dados do registro.");
+                alert("Erro na conexão com o servidor.");
+                btn.disabled = false;
             });
     }
 
