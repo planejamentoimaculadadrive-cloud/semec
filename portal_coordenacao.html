@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Controle - Gestão 2026</title>
+    <style>
+        /* MANTIDO TODO O SEU CSS ORIGINAL */
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
+        body { 
+            background: #f0f2f5; 
+            color: #333; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            min-height: 100vh; 
+            padding: 20px; 
+            display: none; /* Escondemos o corpo inicialmente para a senha */
+        }
+
+        .header { text-align: center; margin-bottom: 40px; margin-top: 20px; }
+        .header h1 { color: #003366; font-size: 28px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        .header p { color: #666; font-size: 16px; }
+
+        .container { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 25px; 
+            max-width: 900px; 
+            width: 100%; 
+        }
+
+        .card { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 15px; 
+            text-align: center; 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border-bottom: 5px solid transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .card:hover { 
+            transform: translateY(-8px); 
+            box-shadow: 0 12px 20px rgba(0,0,0,0.15); 
+        }
+
+        .card i { font-size: 50px; margin-bottom: 15px; display: block; font-style: normal; }
+        .card h3 { font-size: 20px; color: #003366; margin-bottom: 10px; }
+        .card p { font-size: 14px; color: #777; line-height: 1.4; }
+
+        .border-blue { border-bottom-color: #003366; }
+        .border-green { border-bottom-color: #27ae60; }
+
+        .botoes-rodape { margin-top: 50px; display: flex; gap: 15px; }
+
+        .btn-acao {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+            font-size: 13px;
+        }
+
+        .btn-voltar { background: #666; color: white; }
+        .btn-voltar:hover { background: #444; }
+        
+        .btn-sair { background: #c0392b; color: white; }
+        .btn-sair:hover { background: #a93226; }
+
+        @media (max-width: 600px) {
+            .container { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Diário Digital 2026</h1>
+    <p>Portal de Gestão e Acompanhamento Pedagógico</p>
+</div>
+
+<div class="container">
+    <div class="card border-blue" onclick="window.location.href='visualizar_gestao.html'">
+        <i>📂</i>
+        <h3>Análise de Lançamentos</h3>
+        <p>Visualização detalhada de Metodologias, Objetivos e Habilidades BNCC.</p>
+    </div>
+
+    <div class="card border-green" onclick="window.location.href='contagem_gestao.html'">
+        <i>📈</i>
+        <h3>Contagem de Aulas</h3>
+        <p>Resumo quantitativo de registros por docente, turma e escola.</p>
+    </div>
+</div>
+
+<div class="botoes-rodape">
+        <button class="btn-acao btn-sair" onclick="sairDoSistema()">🏃 Sair</button>
+</div>
+
+<script>
+    window.onload = function() {
+        // Verifica se já existe uma validação ativa nesta sessão
+        var jaValidado = sessionStorage.getItem('gestao_autorizada');
+
+        if (jaValidado === "true") {
+            // Se já validou antes, apenas mostra a página
+            document.body.style.display = "flex";
+        } else {
+            // Se for o primeiro acesso, pede a senha
+            var senhaAcesso = prompt("ÁREA RESTRITA: Digite a senha da coordenação:");
+            
+            if (senhaAcesso === "gestao2026") {
+                // Salva que a senha está correta para esta sessão
+                sessionStorage.setItem('gestao_autorizada', 'true');
+                document.body.style.display = "flex";
+            } else {
+                alert("Senha incorreta! Acesso negado.");
+                window.location.href = 'index.html';
+            }
+        }
+    };
+
+    function sairDoSistema() {
+        if(confirm("Deseja realmente encerrar a sessão de gestão?")) {
+            // Limpa a trava de segurança ao sair
+            sessionStorage.removeItem('gestao_autorizada');
+            window.location.href = 'index.html';
+        }
+    }
+</script>
+</body>
+</html>

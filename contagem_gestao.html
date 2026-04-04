@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contagem de Registros - Educação Infantil</title>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
+        body { background: #f4f7f6; padding: 20px; color: #333; }
+        
+        .header-relatorio { 
+            max-width: 1100px; margin: 0 auto 20px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            background: #1e8449; padding: 20px; border-radius: 12px; color: white; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .container { max-width: 1100px; margin: 0 auto; }
+
+        .filtros-area { 
+            background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); align-items: end;
+        }
+        
+        .campo-filtro label { display: block; font-size: 10px; font-weight: bold; margin-bottom: 5px; color: #1e8449; text-transform: uppercase; }
+        select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ced4da; font-size: 13px; outline: none; }
+
+        .btn-limpar { background: #f8f9fa; border: 1px solid #ddd; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; height: 40px; }
+        .btn-limpar:hover { color: #d93025; border-color: #d93025; }
+
+        .tabela-container { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { background: #eef2f7; color: #1e8449; padding: 15px; font-size: 13px; text-transform: uppercase; border-bottom: 2px solid #1e8449; }
+        td { padding: 15px; border-bottom: 1px solid #f1f1f1; font-size: 14px; }
+        
+        .total-badge { background: #1e8449; color: white; padding: 6px 15px; border-radius: 20px; font-weight: bold; }
+        .tag-contexto { font-size: 11px; color: #666; background: #f1f3f9; padding: 3px 8px; border-radius: 4px; display: inline-block; margin-top: 5px; }
+
+        .btn-voltar { background: white; color: #1e8449; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        #status { text-align: center; padding: 40px; color: #888; font-style: italic; }
+    </style>
+</head>
+<body>
+
+<div class="header-relatorio">
+    <div>
+        <h1>📈 Estatísticas Infantis</h1>
+        <p>Monitoramento via Coluna I (Campo de Experiência)</p>
+    </div>
+    <button class="btn-voltar" onclick="window.location.href='portal_coordenacao.html'">⬅ Voltar</button>
+</div>
+
+<div class="container">
+    <div class="filtros-area">
+        <div class="campo-filtro">
+            <label>1. Escola (F)</label>
+            <select id="fEscola" onchange="atualizarInterface()"><option value="">-- Todas as Escolas --</option></select>
+        </div>
+        <div class="campo-filtro">
+            <label>2. Turma (G)</label>
+            <select id="fTurma" onchange="filtrar()"><option value="">-- Todas --</option></select>
+        </div>
+        <div class="campo-filtro">
+            <label>3. Campo de Experiência (I)</label>
+            <select id="fCampo" onchange="filtrar()"><option value="">-- Todos os Campos --</option></select>
+        </div>
+        <button class="btn-limpar" onclick="limpar()">🧹 LIMPAR</button>
+    </div>
+
+    <div id="status">Buscando dados na Coluna I...</div>
+    
+    <div class="tabela-container">
+        <table id="tabelaResumo">
+            <thead>
+                <tr>
+                    <th>Professor(a)</th>
+                    <th>Contexto Selecionado</th>
+                    <th style="text-align: center;">Total de Registros</th>
+                </tr>
+            </thead>
+            <tbody id="corpoTabela"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // Usando sua URL original e o parâmetro que o seu GS já aceita
+    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbx_0g4gCIkeFAXBaAklRWFq5IZFOOtZKAzM6ln98XEqu8RyKLwDTOJ0av154nG6e6Becw/exec";
+    let todosOsDados = [];
+
+    // Função de carregamento compatível com o seu retornarJSON do GS
+    function buscarDados() {
+        const script = document.createElement('script');
+        // Mantendo o seu "tipo=ler_registros" e adicionando "gestao=true"
+        script.src = URL_SCRIPT + "?tipo=ler_registros&gestao=true&callback=processarDados";
+        document.body.appendChild(script);
+    }
+
+    // Essa função é chamada pelo callback do seu Google Script
+    function processarDados(dados) {
+        if (dados.erro || !Array.isArray(dados)) {
+            document.getElementById('status').innerText = "Erro ao ler a Coluna I.";
+            return;
+        }
+        todosOsDados = dados;
+        popularFiltrosIniciais();
+        filtrar();
+    }
+
+    function popularFiltrosIniciais() {
+        const selEsc = document.getElementById('fEscola');
+        const selCampo = document.getElementById('fCampo');
+
+        // MUDANÇA AQUI: Agora usamos "i.campo" (como está no seu GS original)
+        const escolas = [...new Set(todosOsDados.map(i => i.escola))].filter(Boolean).sort();
+        const campos = [...new Set(todosOsDados.map(i => i.campo))].filter(Boolean).sort();
+
+        escolas.forEach(e => selEsc.innerHTML += `<option value="${e}">${e}</option>`);
+        campos.forEach(c => selCampo.innerHTML += `<option value="${c}">${c}</option>`);
+        
+        atualizarTurmas();
+    }
+
+    function atualizarInterface() {
+        atualizarTurmas();
+        filtrar();
+    }
+
+    function atualizarTurmas() {
+        const escola = document.getElementById('fEscola').value;
+        const selTurma = document.getElementById('fTurma');
+        selTurma.innerHTML = '<option value="">-- Todas --</option>';
+        
+        let filtrados = escola ? todosOsDados.filter(i => i.escola === escola) : todosOsDados;
+        const turmasUnicas = [...new Set(filtrados.map(i => i.turma))].filter(Boolean).sort();
+        
+        turmasUnicas.forEach(t => selTurma.innerHTML += `<option value="${t}">${t}</option>`);
+    }
+
+    function filtrar() {
+        const esc = document.getElementById('fEscola').value;
+        const turma = document.getElementById('fTurma').value;
+        const campoFiltro = document.getElementById('fCampo').value;
+
+        let filtrados = todosOsDados;
+        if (esc) filtrados = filtrados.filter(i => i.escola === esc);
+        if (turma) filtrados = filtrados.filter(i => i.turma === turma);
+        
+        // MUDANÇA AQUI: Filtrando pela propriedade "campo"
+        if (campoFiltro) filtrados = filtrados.filter(i => i.campo === campoFiltro);
+
+        const contagem = {};
+        const escolaDoProf = {};
+
+        filtrados.forEach(reg => {
+            const nomeProf = reg.professor || "Não identificado";
+            contagem[nomeProf] = (contagem[nomeProf] || 0) + 1;
+            escolaDoProf[nomeProf] = reg.escola;
+        });
+
+        renderizarTabela(contagem, escolaDoProf, { esc, turma, campoFiltro });
+    }
+
+    function renderizarTabela(contagem, escolaDoProf, filtros) {
+        const corpo = document.getElementById('corpoTabela');
+        const status = document.getElementById('status');
+        corpo.innerHTML = "";
+        
+        const professores = Object.keys(contagem).sort();
+
+        if (professores.length === 0) {
+            status.style.display = "block";
+            status.innerText = "Nenhum registro encontrado na Coluna I.";
+            return;
+        }
+
+        status.style.display = "none";
+        
+        professores.forEach(prof => {
+            const tr = document.createElement('tr');
+            let contexto = filtros.campoFiltro ? `Campo: ${filtros.campoFiltro}` : "Todos os Campos BNCC";
+            if(filtros.turma) contexto += ` | Turma: ${filtros.turma}`;
+
+            tr.innerHTML = `
+                <td>
+                    <div style="font-weight:bold">👤 ${prof}</div>
+                    <div style="font-size:11px; color:#1e8449">${escolaDoProf[prof]}</div>
+                </td>
+                <td><span class="tag-contexto">${contexto}</span></td>
+                <td style="text-align: center;"><span class="total-badge">${contagem[prof]}</span></td>
+            `;
+            corpo.appendChild(tr);
+        });
+    }
+
+    function limpar() {
+        document.getElementById('fEscola').value = "";
+        document.getElementById('fCampo').value = "";
+        atualizarTurmas();
+        filtrar();
+    }
+
+    // Inicia a busca ao carregar a página
+    window.onload = buscarDados;
+</script>
+</body>
+</html>

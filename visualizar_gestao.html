@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análise Pedagógica - Gestão</title>
+    
+    <style>
+        :root { --primary: #003366; --secondary: #1a73e8; --bg: #f0f2f5; --white: #ffffff; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); margin: 0; padding: 0; }
+        .header-gestao { background: var(--primary); color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        .btn-voltar { background: white; color: var(--primary); border: none; padding: 8px 20px; border-radius: 5px; cursor: pointer; text-decoration: none; font-weight: bold; }
+        .container { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
+        .filtros-card { background: var(--white); padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .filtro-item label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 13px; color: var(--secondary); }
+        .filtro-item select, .filtro-item input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; }
+        .grid-resultados { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; }
+        .card-registro { background: var(--white); border-radius: 12px; border-left: 6px solid var(--secondary); padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .card-header { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px; }
+        .prof-nome { font-weight: bold; color: var(--primary); }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; margin-bottom: 10px; background: #eef3ff; color: var(--secondary); margin-right: 5px; }
+        .info-label { font-weight: bold; font-size: 12px; color: #555; margin-top: 10px; display: block; }
+        .info-texto { font-size: 14px; margin-bottom: 10px; line-height: 1.4; background: #f9f9f9; padding: 8px; border-radius: 5px; border: 1px solid #eee; }
+        .status-msg { text-align: center; padding: 50px; font-weight: bold; color: var(--secondary); grid-column: 1 / -1; }
+    </style>
+</head>
+<body>
+
+    <div class="header-gestao">
+        <div>
+            <h2 style="margin:0">Análise Pedagógica</h2>
+            <div id="contador" style="font-size: 14px; opacity: 0.9;">Conectando à planilha...</div>
+        </div>
+        <a href="portal_coordenacao.html" class="btn-voltar">← Voltar</a>
+    </div>
+
+    <div class="container">
+        <div class="filtros-card">
+            <div class="filtro-item">
+                <label>Escola</label>
+                <select id="fEscola" onchange="filtrar()"><option value="">Todas</option></select>
+            </div>
+            <div class="filtro-item">
+                <label>Professor</label>
+                <select id="fProfessor" onchange="filtrar()"><option value="">Todos</option></select>
+            </div>
+            <div class="filtro-item">
+                <label>Bimestre</label>
+                <select id="fBimestre" onchange="filtrar()">
+                    <option value="">Todos</option>
+                    <option value="1º BIMESTRE">1º BIMESTRE</option>
+                    <option value="2º BIMESTRE">2º BIMESTRE</option>
+                    <option value="3º BIMESTRE">3º BIMESTRE</option>
+                    <option value="4º BIMESTRE">4º BIMESTRE</option>
+                </select>
+            </div>
+            <div class="filtro-item">
+                <label>Data</label>
+                <input type="date" id="fData" onchange="filtrar()">
+            </div>
+        </div>
+
+        <div id="listaResultados" class="grid-resultados">
+            <div class="status-msg" id="msgCarregando">Buscando dados em REGISTRO_INFANTIL...</div>
+        </div>
+    </div>
+
+    <script>
+        // URL DO SEU SCRIPT GOOGLE
+        var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw2Ie7Pjctnep9it3q-CUj9Dv216uT7DDSCtfb387OX8soT15dbT-h5k09pbRVG7KGf/exec';
+
+        let DADOS_PLANILHA = [];
+
+        function receberDados(resposta) {
+            DADOS_PLANILHA = resposta;
+            document.getElementById('msgCarregando').style.display = 'none';
+            document.getElementById('contador').innerText = DADOS_PLANILHA.length + " registros carregados";
+            povoarFiltros();
+            renderizarCards(DADOS_PLANILHA);
+        }
+
+        function carregarDados() {
+            const script = document.createElement('script');
+            // IMPORTANTE: Adicionei o t= para evitar que o navegador use dados velhos
+            script.src = SCRIPT_URL + "?tipo=ler_registros&gestao=true&callback=receberDados&t=" + new Date().getTime();
+            script.onerror = () => document.getElementById('msgCarregando').innerHTML = "❌ Erro ao conectar com o Google.";
+            document.body.appendChild(script);
+        }
+
+        function povoarFiltros() {
+            const escolas = [...new Set(DADOS_PLANILHA.map(d => d.escola))].filter(Boolean).sort();
+            const professores = [...new Set(DADOS_PLANILHA.map(d => d.professor))].filter(Boolean).sort();
+            const selEscola = document.getElementById('fEscola');
+            const selProf = document.getElementById('fProfessor');
+            escolas.forEach(e => selEscola.innerHTML += `<option value="${e}">${e}</option>`);
+            professores.forEach(p => selProf.innerHTML += `<option value="${p}">${p}</option>`);
+        }
+
+        function renderizarCards(lista) {
+            const container = document.getElementById('listaResultados');
+            container.innerHTML = "";
+            if (lista.length === 0) {
+                container.innerHTML = "<div class='status-msg'>Nenhum registro encontrado.</div>";
+                return;
+            }
+            lista.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card-registro';
+                // AJUSTADO PARA AS SUAS COLUNAS (B, C, D, E, F...)
+                card.innerHTML = `
+                    <div class="card-header">
+                        <span class="prof-nome">👤 ${item.professor || 'Não identificado'}</span>
+                        <span style="font-size:12px; color:#666;">📅 ${item.data || '--'}</span>
+                    </div>
+                    <span class="badge">🏫 ${item.escola || '---'}</span>
+                    <span class="badge">👥 ${item.turma || '---'} (${item.turno || ''})</span>
+                    <span class="badge" style="background:#fff3e0; color:#e65100;">📖 ${item.bimestre || ''}</span>
+                    
+                    <span class="info-label">🎯 OBJETIVOS DE APRENDIZAGEM (BNCC):</span>
+                    <div class="info-texto">${item.campo || '---'}</div>
+                    
+                    <span class="info-label">📚 SABERES E CONHECIMENTO (METODOLOGIA):</span>
+                    <div class="info-texto">${item.objetivos || '---'}</div>
+                    
+                    <span class="info-label">📝 METODOLOGIA/PROPOSTA ATIVA:</span>
+                    <div class="info-texto">${item.metodologia || '---'}</div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function filtrar() {
+            const esc = document.getElementById('fEscola').value;
+            const prof = document.getElementById('fProfessor').value;
+            const bim = document.getElementById('fBimestre').value;
+            const dataSel = document.getElementById('fData').value;
+            let dataFormatada = "";
+            if(dataSel) {
+                const p = dataSel.split("-");
+                dataFormatada = `${p[2]}/${p[1]}/${p[0]}`;
+            }
+            const filtrados = DADOS_PLANILHA.filter(d => {
+                return (esc === "" || d.escola === esc) &&
+                       (prof === "" || d.professor === prof) &&
+                       (bim === "" || d.bimestre === bim) &&
+                       (dataFormatada === "" || d.data === dataFormatada);
+            });
+            renderizarCards(filtrados);
+            document.getElementById('contador').innerText = filtrados.length + " registros filtrados";
+        }
+
+        window.onload = carregarDados;
+    </script>
+</body>
+</html>

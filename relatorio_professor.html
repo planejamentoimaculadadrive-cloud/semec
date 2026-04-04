@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Relatório de Lançamentos - Diário Digital</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="config.js"></script>
+    
     <style>
         :root { 
             --blue: #1a73e8; 
@@ -62,6 +65,10 @@
     <a href="menu.html" class="btn-voltar">⬅ VOLTAR AO MENU</a>
 
     <button class="btn-sync" onclick="buscarDados()">🔄 ATUALIZAR LISTA</button>
+
+<button class="btn-sync" style="background-color: #1e8e3e; color: white; border: none;" onclick="gerarPDFGeral()">
+    🖨️ IMPRIMIR TODOS (PDF FILTRADO)
+</button>
     
     <div style="font-size: 10px; text-align: center; color: #888; margin-bottom: 10px;">💡 Dois cliques para expandir o card</div>
 
@@ -74,6 +81,7 @@
 <script>
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxdQht0Ek7Y8o8p8QUbhynYK2yAhw0mXhwjYE6Dt7er9CYBtAgJCjXacntEXYcKTDLkNQ/exec';
     const NOME_PROFESSOR = localStorage.getItem('user_nome');
+    let dadosCarregados = []; // --- NOVA VARIÁVEL GLOBAL ---
 
     window.onload = () => {
         if(!NOME_PROFESSOR) { window.location.href = 'index.html'; return; }
@@ -81,19 +89,27 @@
         buscarDados();
     };
 
-    function buscarDados() {
-        const loading = document.getElementById('loading');
-        const lista = document.getElementById('lista');
-        loading.style.display = 'block';
-        lista.innerHTML = '';
+ function buscarDados() {
+    const loading = document.getElementById('loading');
+    const lista = document.getElementById('lista');
+    loading.style.display = 'block';
+    lista.innerHTML = '';
 
-        fetch(`${SCRIPT_URL}?tipo=ler_registros&professor=${encodeURIComponent(NOME_PROFESSOR)}&nocache=${new Date().getTime()}`)
-            .then(r => r.json())
-            .then(dados => {
-                loading.style.display = 'none';
-                renderizar(dados);
+    fetch(`${SCRIPT_URL}?tipo=ler_registros&professor=${encodeURIComponent(NOME_PROFESSOR)}&nocache=${new Date().getTime()}`)
+        .then(r => r.json())
+        .then(dados => {
+            loading.style.display = 'none';
+
+            // --- AQUI ENTRA A MÁGICA DA ORDENAÇÃO ---
+            // Vamos organizar os dados por data de forma decrescente (mais novo primeiro)
+            dados.sort((a, b) => {
+                return new Date(b.data) - new Date(a.data);
             });
-    }
+
+            dadosCarregados = dados; 
+            renderizar(dados);
+        });
+}
 
     function renderizar(dados) {
         const lista = document.getElementById('lista');
@@ -105,20 +121,20 @@
             card.innerHTML = `
                 <div class="card-header">
                     <span>📅 DATA: ${formatarData(item.data)}</span>
-                    <span>BIMESTRE: ${item.bimestre}</span>
+                    <span>🗓 BIMESTRE: ${item.bimestre}</span>  
                 </div>
-                <div class="info-linha"><b>PROFESSOR:</b> ${item.professor}</div>
-                <div class="info-linha"><b>ESCOLA:</b> ${item.escola}</div>
-                <div class="info-linha"><b>TURMA/TURNO:</b> ${item.turma} - ${item.turno}</div>
-                <div class="info-linha"><b>PRÁTICAS:</b> ${item.numAulas}</div>
-                <div class="info-linha"><b>CAMPOS DE EXPERIÊNCIA:</b> ${item.campo}</div>
+                <div class="info-linha"><b>👫 PROFESSOR(A):</b> ${item.professor}</div>   
+                <div class="info-linha"><b>🏡 ESCOLA:</b> ${item.escola}</div>
+                <div class="info-linha"><b>🕒 TURMA/TURNO:</b> ${item.turma} - ${item.turno}</div>    
+                <div class="info-linha"><b>📚 PRÁTICAS:</b> ${item.numAulas}</div>
+                <div class="info-linha"><b>📙 CAMPOS DE EXPERIÊNCIA:</b> ${item.campo}</div>
 
                 <div class="conteudo-expansivel">
-                    <b>OBJETIVOS DE CONHECIMENTO:</b>
-                    <div class="bloco-texto">${item.objetivo}</div>
-                    <b>METODOLOGIA E PROPOSTA ATIVA:</b>
+                    <b>🎯 OBJETIVOS DE APRENDIZAGEM (BNCC):</b>
+                    <div class="bloco-texto">${item.objetivos || item.objetivo}</div>  
+                    <b>📚 SABERES E CONHECIMENTO (METODOLOGIA):</b>
                     <div class="bloco-texto">${item.metodologia}</div>
-                    ${item.observacoes ? `<b>OBSERVAÇÕES:</b><div class="bloco-texto">${item.observacoes}</div>` : ''}
+                    ${item.observacoes ? `<b>📝 METODOLOGIA/PROPOSTA ATIVA:</b><div class="bloco-texto">${item.observacoes}</div>` : ''}
                 </div>
 
                <div class="acoes">
@@ -144,12 +160,45 @@
         });
     }
 
-    function editar(id) { window.location.href = `formulario_infantil.html?editID=${id}`; }
+function editar(id) { 
+    if(!id || id === 'undefined') {
+        alert("Erro: Este registro não possui um ID válido para edição.");
+        return;
+    }
+    window.location.href = `formulario_infantil.html?editID=${id}`; 
+}
 
-    function gerarPDF(event, dados) {
-        if(event) event.stopPropagation();
+    // --- NOVA FUNÇÃO: GERAR PDF DE TODOS OS FILTRADOS ---
+    function gerarPDFGeral() {
+        const termo = document.getElementById('busca').value.toLowerCase();
+        // Filtra os dados originais baseado no que está na busca
+        const dadosFiltrados = dadosCarregados.filter(item => {
+            const textoCompleto = JSON.stringify(item).toLowerCase();
+            return textoCompleto.includes(termo);
+        });
+
+        if (dadosFiltrados.length === 0) {
+            alert("Nenhum registro encontrado para imprimir.");
+            return;
+        }
+
         const win = window.open('', '_blank');
         
+        let htmlBase = `<html><head><style>
+            body { font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; color: #333; line-height: 1.4; }
+            .pagina { page-break-after: always; padding: 20px; border-bottom: 1px dashed #ccc; }
+            .header-pdf { text-align: center; border-bottom: 3px solid #1a73e8; padding-bottom: 10px; margin-bottom: 20px; }
+            .logo { max-height: 60px; }
+            .title { font-size: 16px; font-weight: bold; color: #1a73e8; margin-top: 5px; }
+            .grid-info { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; border: 1px solid #eee; padding: 10px; background: #fcfcfc; border-radius: 5px; }
+            .info-item { font-size: 11px; }
+            .info-item b { color: #1a73e8; text-transform: uppercase; font-size: 9px; display: block; }
+            .secao-titulo { font-weight: bold; font-size: 10px; color: #1a73e8; text-transform: uppercase; border-bottom: 1px solid #1a73e8; margin-top: 10px; }
+            .secao-conteudo { font-size: 12px; text-align: justify; white-space: pre-wrap; padding: 3px 0; }
+            .footer { margin-top: 30px; display: flex; justify-content: space-around; text-align: center; font-size: 9px; }
+            .assinatura { border-top: 1px solid #999; width: 180px; padding-top: 5px; }
+        </style></head><body>`;
+
         const logos = {
             "EMEIF MARIA MADALENA TORRES DANTAS": "https://lh3.googleusercontent.com/d/1m2edYTssohJHNbAsH6faLpD-EPiOFySV",
             "EMEIF JOÃO GONÇALVES DA SILVA": "https://lh3.googleusercontent.com/d/1Azxwq1p2gHmOOJGUeKfIS0bqYGpnypcf",
@@ -158,6 +207,55 @@
             "EMEIF JOSÉ VIEIRA DA SILVA": "https://lh3.googleusercontent.com/d/19-cir2L2bWYR7sj39_DoNjpckopXRGz-",
             "EMEIF MARIA PEREIRA DOS SANTOS": "https://lh3.googleusercontent.com/d/17G_gQ3Kaz9xSqBU--lblaSejZylqZ2t6",
             "ESCOLA JARDIM DE DEUS AÇÃO EVANGELICA": "https://lh3.googleusercontent.com/d/1RWc8dAv73W9drrvqG44vHSNMS_RRxFh2"
+        };
+
+        dadosFiltrados.forEach(item => {
+            const logoUrl = logos[item.escola] || "";
+            htmlBase += `
+                <div class="pagina">
+                    <div class="header-pdf">
+                        ${logoUrl ? `<img src="${logoUrl}" class="logo">` : ''}
+                        <div class="title">PLANEJAMENTO PEDAGÓGICO</div>
+                    </div>
+                    <div class="grid-info">
+                        <div class="info-item"><b>Bimestre</b>${item.bimestre}</div>
+                        <div class="info-item"><b>Data</b>${formatarData(item.data)}</div>
+                        <div class="info-item"><b>Professor</b>${item.professor}</div>
+                        <div class="info-item"><b>Práticas</b>${item.numAulas}</div>
+                        <div class="info-item" style="grid-column: span 2"><b>Escola</b>${item.escola}</div>
+                    </div>
+                    <div class="secao-titulo">CAMPOS DE EXPERIÊNCIA</div>
+                    <div class="secao-conteudo">${item.campo}</div>
+                    <div class="secao-titulo">OBJETIVOS DE CONHECIMENTO</div>
+                    <div class="secao-conteudo">${item.objetivos || item.objetivo}</div>
+                    <div class="secao-titulo">METODOLOGIA</div>
+                    <div class="secao-conteudo">${item.metodologia}</div>
+                    ${item.observacoes ? `<div class="secao-titulo">OBSERVAÇÕES</div><div class="secao-conteudo">${item.observacoes}</div>` : ''}
+                    <div class="footer">
+                        <div class="assinatura">Professor(a)</div>
+                        <div class="assinatura">Coordenação</div>
+                    </div>
+                </div>`;
+        });
+
+        htmlBase += `<script>window.onload = function() { window.print(); setTimeout(window.close, 500); };<\/script></body></html>`;
+        win.document.write(htmlBase);
+        win.document.close();
+    }
+
+    function gerarPDF(event, dados) {
+        if(event) event.stopPropagation();
+        const win = window.open('', '_blank');
+        
+        const logos = {
+           "EMEIF MARIA MADALENA TORRES DANTAS": "https://lh3.googleusercontent.com/d/1K-Ih0PBzwMzmQXB7lWTZLQIZVifViHfL ",
+            "EMEIF JOÃO GONÇALVES DA SILVA": "https://lh3.googleusercontent.com/d/1ifsNIUB2Ea18xaVSZiDqJkDV_940dieh ",
+            "EMEIF JOSÉ ALVES SABINO": "https://lh3.googleusercontent.com/d/1LE0qxYPlHKCMqzyXJRlVAKQ8P3-buMEU ",
+            "CRECHE MUNICIPAL RAIMUNDA TRINDADE SABINO": "https://lh3.googleusercontent.com/d/1WhyspgSIzYGFlAV4vOlQgzDXsnLd0TEo ",
+            "EMEIF JOSÉ VIEIRA DA SILVA": "https://lh3.googleusercontent.com/d/1rb3Pjy7IxHKlEWQEg5Q9eXG25QsCgfTv ",
+            "EMEIF MARIA PEREIRA DOS SANTOS": "https://lh3.googleusercontent.com/d/1uYhcIRmA3Ue_cpVG3uIh7UcoUCUv_63T ",
+            "ESCOLA JARDIM DE DEUS AÇÃO EVANGELICA": "https://lh3.googleusercontent.com/d/1-gnXVu-tiSxi7f9ai9irJ49zTtgxz8px ",
+            "EMEIF JOSÉ PEDRO DE MELO": "https://lh3.googleusercontent.com/d/1JoBnXC_DYapa5NL_mI3hXQcVkaONHntr "
         };
 
         const logoUrl = logos[dados.escola] || "";
@@ -206,7 +304,7 @@
 
                 <div class="secao">
                     <div class="secao-titulo">OBJETIVOS DE CONHECIMENTO</div>
-                    <div class="secao-conteudo">${dados.objetivo}</div>
+                    <div class="secao-conteudo">${dados.objetivos || dados.objetivo}</div>
                 </div>
 
                 <div class="secao">

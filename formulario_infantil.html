@@ -4,35 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro - Diário Digital</title>
-    <style>
-        :root {
-            --blue-main: #2196F3;
-            --green-btn: #2E7D32;
-            --bg-body: #f4f7f6;
-            --text-dark: #444;
-        }
+    
+    <link rel="stylesheet" href="style.css">
+    <script src="config.js"></script>
 
-        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg-body); display: flex; justify-content: center; padding: 15px; margin: 0; }
-        .card { background: white; width: 100%; max-width: 550px; border-radius: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.08); overflow: hidden; }
-        .header { background-color: var(--blue-main); color: white; text-align: center; padding: 20px; }
+    <style>
+        /* Mantendo apenas o que é específico deste formulário */
+        .card { background: white; width: 100%; max-width: 550px; border-radius: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.08); overflow: hidden; margin: auto; }
+        .header { background-color: var(--blue); color: white; text-align: center; padding: 20px; }
         .header h1 { margin: 0; font-size: 18px; text-transform: uppercase; letter-spacing: 1px; }
-        
         .content { padding: 20px; }
         .row-tripla { display: grid; grid-template-columns: 1.2fr 0.8fr 1fr; gap: 10px; margin-bottom: 15px; }
-        
-        label { display: block; font-weight: bold; margin-bottom: 5px; color: var(--text-dark); font-size: 13px; }
-        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
-        
-        .campo-bncc { background: #e3f2fd; padding: 15px; border-radius: 10px; margin-bottom: 15px; border-left: 5px solid var(--blue-main); }
-        
+        .campo-bncc { background: #e3f2fd; padding: 15px; border-radius: 10px; margin-bottom: 15px; border-left: 5px solid var(--blue); }
         .lista-objetivos { max-height: 250px; overflow-y: auto; background: white; padding: 10px; border: 1px solid #ddd; border-radius: 8px; margin-top: 10px; }
         .item-obj { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid #eee; font-size: 13px; cursor: pointer; }
         .item-obj input { width: auto; margin-top: 3px; }
-
-        .btn-salvar { width: 100%; padding: 15px; background-color: var(--green-btn); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
-        .btn-salvar:disabled { background-color: #999; }
-        
-        .btn-voltar { display: block; text-align: center; margin-top: 15px; color: #666; text-decoration: none; font-size: 14px; }
+        textarea { resize: vertical; }
+        .btn-salvar { background-color: #2e7d32; }
     </style>
 </head>
 <body>
@@ -46,10 +34,10 @@
         <div class="row-tripla">
             <div>
                 <label>📅 DATA</label>
-                <input type="date" id="data">
+                <input type="date" id="data" required>
             </div>
             <div>
-                <label>🔢 PRÁTICAS </label>
+                <label>🔢 AULAS</label>
                 <input type="number" id="numAulas" value="1">
             </div>
             <div>
@@ -80,51 +68,97 @@
             <p style="color:#999; text-align:center; font-size:12px;">Selecione um Campo de Experiência</p>
         </div>
 
-        <label style="margin-top:15px;">📚 SABERES E CONHECIMENTO</label>
+        <label style="margin-top:15px;">📚 SABERES E CONHECIMENTO (METODOLOGIA)</label>
         <textarea id="metodologia" rows="3" placeholder="Descreva como foi a aula..."></textarea>
 
         <label style="margin-top:10px;">📝 METODOLOGIA/PROPOSTA ATIVA</label>
         <textarea id="observacoes" rows="2" placeholder="Opcional..."></textarea>
 
-        <button class="btn-salvar" id="btnSalvar" onclick="salvar()">Gravar Registro</button>
-        <a href="menu.html" class="btn-voltar">↩️ Voltar ao Menu</a>
+        <button class="btn-salvar" id="btnSalvar" onclick="salvar()">💾 Gravar Registro</button>
+        
+        <div style="text-align: center; margin-top: 15px; width: 100%;">
+            <a href="menu.html" style="display: inline-block; width: 100%; max-width: 250px; padding: 15px; background-color: #607d8b; color: white; text-decoration: none; border-radius: 10px; font-size: 15px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: background-color 0.3s, transform 0.2s;" onmouseover="this.style.backgroundColor='#546e7a'" onmouseout="this.style.backgroundColor='#607d8b'">
+                ↩️ Voltar ao Menu
+            </a>
+        </div>
     </div>
 </div>
 
 <script>
-    const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbxdQht0Ek7Y8o8p8QUbhynYK2yAhw0mXhwjYE6Dt7er9CYBtAgJCjXacntEXYcKTDLkNQ/exec'; 
-    
     let referencias = [];
-    let editID = null;
+    let editID = null; 
+
+    function processarDados(data) {
+        if (data.status === "sucesso" && data.dados) {
+            preencherParaEdicao(data.dados);
+            return;
+        }
+
+        if (data.status === "erro") {
+            alert("Erro: " + data.msg);
+            return;
+        }
+        
+        referencias = data; 
+        const mSel = document.getElementById('modalidade');
+        const mods = [...new Set(data.map(i => i.modalidade))].filter(Boolean);
+        
+        mSel.innerHTML = '<option value="">Selecione...</option>';
+        mods.sort().forEach(m => mSel.add(new Option(m, m)));
+        
+        if(editID) {
+            const scriptEdit = document.createElement('script');
+            scriptEdit.src = URL_SCRIPT + '?tipo=buscar_registro_por_id&id=' + editID;
+            document.body.appendChild(scriptEdit);
+        }
+    }
 
     window.onload = function() {
-        const params = new URLSearchParams(window.location.search);
-        const idDaUrl = params.get('editID');
-        
-        fetch(URL_SCRIPT + '?tipo=referencias')
-            .then(r => r.json())
-            .then(data => {
-                referencias = data;
-                const mSel = document.getElementById('modalidade');
-                const mods = [...new Set(data.map(i => i.modalidade))].filter(Boolean);
-                mSel.innerHTML = '<option value="">Selecione...</option>';
-                mods.sort().forEach(m => mSel.add(new Option(m, m)));
-                
-                if (idDaUrl) {
-                    verificarEdicao(idDaUrl);
-                } else {
-                    editID = null;
-                    document.getElementById('titulo').innerText = "REGISTRO PEDAGÓGICO";
-                    document.getElementById('data').value = new Date().toISOString().split('T')[0];
-                }
-            });
+        // SUGESTÃO APLICADA: Removida a linha que preenchia a data de hoje automaticamente.
+        // Agora o campo inicia vazio para o professor selecionar.
+
+        const urlParams = new URLSearchParams(window.location.search);
+        editID = urlParams.get('editID');
+
+        if(editID) {
+            document.getElementById('titulo').innerText = "EDITAR REGISTRO";
+            document.getElementById('btnSalvar').innerText = "Atualizar Registro";
+        }
+
+        const script = document.createElement('script');
+        script.src = URL_SCRIPT + '?tipo=referencias';
+        document.body.appendChild(script);
     };
+
+    function preencherParaEdicao(dados) {
+        // Na edição, ele continua puxando a data salva na planilha
+        document.getElementById('data').value = dados.data.split('T')[0];
+        document.getElementById('numAulas').value = dados.numAulas;
+        document.getElementById('bimestre').value = dados.bimestre;
+        document.getElementById('metodologia').value = dados.metodologia;
+        document.getElementById('observacoes').value = dados.observacoes || "";
+
+        const itemBNCC = referencias.find(r => r.objetivo === dados.objetivos.split('; ')[0]);
+        if(itemBNCC) {
+            document.getElementById('modalidade').value = itemBNCC.modalidade;
+            popularCampos();
+            document.getElementById('campo').value = dados.campo;
+            popularObjetivos();
+            
+            const objsSalvos = dados.objetivos.split('; ');
+            setTimeout(() => {
+                const checks = document.getElementsByName('obj_check');
+                checks.forEach(cb => {
+                    if(objsSalvos.includes(cb.value)) cb.checked = true;
+                });
+            }, 500);
+        }
+    }
 
     function popularCampos() {
         const mod = document.getElementById('modalidade').value;
         const campoSel = document.getElementById('campo');
         campoSel.innerHTML = '<option value="">Selecione o Campo...</option>';
-        
         const campos = [...new Set(referencias.filter(i => i.modalidade === mod).map(i => i.campo))];
         campos.forEach(c => campoSel.add(new Option(c, c)));
     }
@@ -134,94 +168,40 @@
         const campo = document.getElementById('campo').value;
         const lista = document.getElementById('listaObjetivos');
         lista.innerHTML = "";
-
         const filtrados = referencias.filter(i => i.modalidade === mod && i.campo === campo);
-        
         filtrados.forEach((item, index) => {
             const div = document.createElement('div');
             div.className = 'item-obj';
-            div.innerHTML = `
-                <input type="checkbox" name="obj_check" value="${item.objetivo}" id="obj${index}">
-                <label for="obj${index}" style="font-weight:normal; margin:0;">${item.objetivo}</label>
-            `;
-            div.onclick = (e) => {
-                if(e.target.tagName !== 'INPUT') {
-                    const cb = div.querySelector('input');
-                    cb.checked = !cb.checked;
-                }
-            };
+            div.innerHTML = `<input type="checkbox" name="obj_check" value="${item.objetivo}" id="obj${index}"><label for="obj${index}" style="font-weight:normal; margin:0;">${item.objetivo}</label>`;
+            div.onclick = (e) => { if(e.target.tagName !== 'INPUT') { const cb = div.querySelector('input'); cb.checked = !cb.checked; } };
             lista.appendChild(div);
         });
     }
 
- function verificarEdicao(id) {
-        editID = id;
-        document.getElementById('titulo').innerText = "CORRIGIR REGISTRO";
-        const btn = document.getElementById('btnSalvar');
-        btn.innerText = "Buscando dados...";
-        btn.disabled = true;
-
-        // Adicionamos &nocache=... para forçar o script a ignorar versões antigas
-        fetch(`${URL_SCRIPT}?tipo=buscar_por_id&id=${id}&nocache=${new Date().getTime()}`)
-            .then(r => r.json())
-            .then(d => {
-                if (d && !d.erro) {
-                    document.getElementById('data').value = d.data;
-                    document.getElementById('numAulas').value = d.numAulas || 1;
-                    document.getElementById('bimestre').value = d.bimestre;
-                    document.getElementById('metodologia').value = d.metodologia;
-                    document.getElementById('observacoes').value = d.observacoes || "";
-                    
-                    // Preenche modalidade e campos
-                    const mSel = document.getElementById('modalidade');
-                    // Tenta encontrar a modalidade nas referências
-                    const itemRef = referencias.find(r => r.campo === d.campo);
-                    if(itemRef) {
-                        mSel.value = itemRef.modalidade;
-                        popularCampos();
-                        document.getElementById('campo').value = d.campo;
-                        popularObjetivos();
-                    }
-
-                    setTimeout(() => {
-                        const salvos = (d.objetivo || "").split('; ');
-                        const checks = document.getElementsByName('obj_check');
-                        checks.forEach(c => { if(salvos.includes(c.value)) c.checked = true; });
-                        
-                        btn.innerText = "Gravar Alterações";
-                        btn.disabled = false;
-                    }, 600);
-                } else {
-                    alert("Erro: " + (d.erro || "Registro não encontrado"));
-                    btn.innerText = "Gravar Registro";
-                    btn.disabled = false;
-                }
-            })
-            .catch(err => {
-                alert("Erro na conexão com o servidor.");
-                btn.disabled = false;
-            });
-    }
-
     function salvar() {
         const btn = document.getElementById('btnSalvar');
-        const selecionados = Array.from(document.getElementsByName('obj_check'))
-                                  .filter(c => c.checked)
-                                  .map(c => c.value);
+        const dataCampo = document.getElementById('data').value; // Pegando o valor da data
+        const selecionados = Array.from(document.getElementsByName('obj_check')).filter(c => c.checked).map(c => c.value);
 
-        if (selecionados.length === 0) { alert("Selecione ao menos um objetivo!"); return; }
+        // SUGESTÃO APLICADA: Validação para impedir salvamento sem data
+        if (!dataCampo) { 
+            alert("⚠️ Por favor, selecione a DATA do registro antes de gravar!"); 
+            return; 
+        }
+
+        if (selecionados.length === 0) { alert("⚠️ Selecione ao menos um objetivo!"); return; }
 
         btn.disabled = true;
         btn.innerText = "Gravando...";
 
         const formData = new FormData();
-        formData.append("acao", "salvar_infantil");
-        formData.append("id", editID || "");
+        if(editID) formData.append("id", editID);
+        
         formData.append("professor", localStorage.getItem('user_nome'));
         formData.append("escola", localStorage.getItem('user_escola'));
         formData.append("turma", localStorage.getItem('user_turma'));
         formData.append("turno", localStorage.getItem('user_turno'));
-        formData.append("data", document.getElementById('data').value);
+        formData.append("data", dataCampo);
         formData.append("numAulas", document.getElementById('numAulas').value);
         formData.append("bimestre", document.getElementById('bimestre').value);
         formData.append("campo", document.getElementById('campo').value);
@@ -231,24 +211,21 @@
 
         fetch(URL_SCRIPT, { method: 'POST', body: formData, mode: 'no-cors' })
             .then(() => {
-                alert("✅ Registro gravado com sucesso!");
-                
-                editID = null; 
-                document.getElementById('titulo').innerText = "REGISTRO PEDAGÓGICO";
-                btn.innerText = "Gravar Registro";
-                btn.disabled = false;
-
-                // Limpa checkboxes e foca na metodologia
-                Array.from(document.getElementsByName('obj_check')).forEach(c => c.checked = false);
-                document.getElementById('metodologia').focus();
+                alert("✅ Registro salvo com sucesso!");
+                if(editID) {
+                    window.location.href = "relatorio_professor.html";
+                } else {
+                    btn.disabled = false;
+                    btn.innerText = "Gravar Registro";
+                    // Opcional: Limpar campo de data após salvar novo registro
+                    document.getElementById('data').value = "";
+                }
             })
             .catch(() => {
                 alert("❌ Erro ao conectar.");
                 btn.disabled = false;
-                btn.innerText = "Gravar Registro";
             });
     }
 </script>
-
 </body>
 </html>

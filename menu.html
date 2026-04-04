@@ -4,150 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menu Principal - Diário Digital</title>
-    <style>
-        :root {
-            --primary: #1a73e8;
-            --success: #1e8e3e;
-            --warning: #f9ab00;
-            --danger: #d93025;
-            --bg: #f0f2f5;
-        }
-
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: var(--bg);
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        .menu-container {
-            width: 100%;
-            max-width: 450px;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-
-        /* Cabeçalho de Boas-vindas */
-        .welcome-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .welcome-header h2 {
-            margin: 0;
-            color: #333;
-            font-size: 24px;
-        }
-
-        .welcome-header p {
-            margin: 5px 0 0;
-            color: #666;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        /* Grade de Botões em Formato de Card */
-        .menu-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr; /* Dois por linha */
-            gap: 15px;
-        }
-
-        .menu-card {
-            background: white;
-            border: none;
-            border-radius: 20px;
-            padding: 25px 15px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            transition: all 0.3s ease;
-        }
-
-        .menu-card:active {
-            transform: scale(0.95);
-            background-color: #f8f9fa;
-        }
-
-        .menu-card .icon {
-            font-size: 32px;
-            margin-bottom: 5px;
-        }
-
-        .menu-card span {
-            font-size: 12px;
-            font-weight: bold;
-            color: #444;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            text-align: center;
-        }
-
-        /* Cores dos Ícones e Destaques */
-        .card-new .icon { color: var(--success); }
-        .card-reports .icon { color: var(--primary); }
-        .card-stats .icon { color: var(--warning); }
-        
-        /* Botão de Sair em destaque na parte inferior */
-        .logout-area {
-            margin-top: 30px;
-            text-align: center;
-        }
-
-        .btn-logout {
-            background: none;
-            border: 1px solid #ccc;
-            color: #888;
-            padding: 10px 25px;
-            border-radius: 30px;
-            font-size: 13px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .btn-logout:hover {
-            background-color: var(--danger);
-            color: white;
-            border-color: var(--danger);
-        }
-    </style>
+    
+    <link rel="stylesheet" href="style.css">
+    <script src="config.js"></script>
 </head>
 <body>
 
 <div class="menu-container">
     <div class="welcome-header">
         <h2 id="userName">Olá, Professor(a)</h2>
-        <p id="userSchool">Nome da Escola</p>
+        <p id="userSchool">Carregando unidade...</p>
     </div>
 
     <div class="menu-grid">
-        <button class="menu-card card-new" onclick="window.location.href='formulario_infantil.html'">
-            <div class="icon">📝</div>
-            <span>Novo<br>Registro</span>
-        </button>
+      <button class="menu-card card-new" onclick="window.location.href='formulario_infantil.html'">
+    <div class="icon">📝</div>
+    <span>Novo Registro</span>
+</button>
 
-        <button class="menu-card card-reports" onclick="window.location.href='relatorio_professor.html'">
-            <div class="icon">📂</div>
-            <span>Meus<br>Lançamentos</span>
-        </button>
+<button class="menu-card card-reports" onclick="window.location.href='relatorio_professor.html'">
+    <div class="icon">📂</div>
+    <span>Meus Lançamentos</span>
+</button>
 
-        <button class="menu-card card-stats" onclick="window.location.href='minhas_estatisticas.html'">
-            <div class="icon">📊</div>
-            <span>Minhas<br>Estatísticas</span>
-        </button>
-
-        <button class="menu-card" onclick="alert('Funcionalidade em breve!')">
-            <div class="icon">👤</div>
-            <span>Meu<br>Perfil</span>
-        </button>
+<button class="menu-card card-stats" onclick="window.location.href='minhas_estatisticas.html'">
+    <div class="icon">📊</div>
+    <span>Minhas Estatísticas</span>
+</button>
     </div>
 
     <div class="logout-area">
@@ -156,20 +39,27 @@
 </div>
 
 <script>
-    window.onload = function() {
-        const nome = localStorage.getItem('user_nome');
-        const escola = localStorage.getItem('user_escola');
-        
-        if (!nome) {
-            window.location.href = 'index.html';
-            return;
-        }
+   window.onload = function() {
+    const nome = localStorage.getItem('user_nome');
+    
+    if (!nome || nome === "undefined") {
+        window.location.href = 'index.html';
+        return;
+    }
 
-        // Formata o nome para exibir apenas o primeiro
-        const primeiroNome = nome.split(' ')[0];
-        document.getElementById('userName').innerText = "Olá, " + primeiroNome;
-        document.getElementById('userSchool').innerText = escola;
-    };
+    // Pega apenas o primeiro nome para a saudação
+    const primeiroNome = nome.split(' ')[0];
+    document.getElementById('userName').innerText = "OLÁ, " + primeiroNome.toUpperCase();
+    
+    // ALTERAÇÃO: Nome fixo do painel conforme solicitado
+    document.getElementById('userSchool').innerText = "PAINEL DE PLANEJAMENTO EDUCAÇÃO INFANTIL";
+};
+
+    function exibirInfoTurma() {
+        const turma = localStorage.getItem('user_turma');
+        const turno = localStorage.getItem('user_turno');
+        alert("Dados da Turma:\n" + turma + " - " + turno);
+    }
 
     function fazerLogout() {
         if(confirm("Deseja realmente sair do sistema?")) {
