@@ -1,177 +1,202 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Relatório de Lançamentos - Diário Digital</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="config.js"></script>
-    
-    <style>
-        :root { 
-            --blue: #1a73e8; 
-            --green: #1e8e3e;
-            --gray: #5f6368; 
-            --bg: #f1f3f4;
-        }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #3c4043; }
-        .container { max-width: 650px; margin: auto; }
-        
-        .header { background: var(--blue); color: white; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .header h2 { margin: 0; font-size: 20px; text-transform: uppercase; }
-        
-        .btn-voltar { 
-            display: block; width: 100%; padding: 12px; background: white; color: var(--gray); 
-            text-align: center; text-decoration: none; border-radius: 10px; margin-bottom: 15px; 
-            font-weight: bold; box-sizing: border-box; font-size: 14px; border: 1px solid #ddd;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relatório de Lançamentos - Diário Digital</title>
+<link rel="stylesheet" href="style.css">
+<script src="config.js"></script>
 
-        .search-box { width: 100%; padding: 12px 15px; border-radius: 10px; border: 1px solid #dadce0; font-size: 16px; margin-bottom: 15px; box-sizing: border-box; outline: none; }
-        .btn-sync { background: white; color: var(--blue); border: 1px solid var(--blue); padding: 10px; border-radius: 10px; width: 100%; font-weight: bold; cursor: pointer; margin-bottom: 20px; }
+<style>
+:root { 
+--blue: #1a73e8; 
+--green: #1e8e3e;
+--gray: #5f6368; 
+--bg: #f1f3f4;
+}
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #3c4043; }
+.container { max-width: 650px; margin: auto; }
 
-        .card { 
-            background: white; border-radius: 12px; padding: 18px; margin-bottom: 15px; 
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05); border-left: 6px solid var(--blue);
-            cursor: pointer; user-select: none; transition: 0.3s;
-        }
-        .card.aberto { border-left-color: var(--green); }
-        
-        .card-header { display: flex; justify-content: space-between; font-weight: bold; color: var(--blue); font-size: 13px; margin-bottom: 10px; border-bottom: 1px solid #f1f1f1; padding-bottom: 8px; }
-        
-        .info-linha { font-size: 14px; margin: 5px 0; }
-        .info-linha b { color: var(--blue); font-size: 12px; text-transform: uppercase; }
-        
-        .conteudo-expansivel { display: none; margin-top: 15px; padding-top: 10px; border-top: 1px dashed #ddd; }
-        .card.aberto .conteudo-expansivel { display: block; }
+.header { background: var(--blue); color: white; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.header h2 { margin: 0; font-size: 20px; text-transform: uppercase; }
 
-        .bloco-texto { background: #f9f9f9; padding: 10px; border-radius: 8px; font-size: 13px; color: #444; margin-bottom: 10px; white-space: pre-wrap; border: 1px solid #eee; }
+.btn-voltar { 
+display: block; width: 100%; padding: 12px; background: white; color: var(--gray); 
+text-align: center; text-decoration: none; border-radius: 10px; margin-bottom: 15px; 
+font-weight: bold; box-sizing: border-box; font-size: 14px; border: 1px solid #ddd;
+}
 
-        .acoes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; }
-        .btn-acao { border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px; text-align: center; }
-        .btn-edit { background: #e8f0fe; color: #1967d2; }
-        .btn-pdf { background: #e6f4ea; color: #137333; }
+.search-box { width: 100%; padding: 12px 15px; border-radius: 10px; border: 1px solid #dadce0; font-size: 16px; margin-bottom: 15px; box-sizing: border-box; outline: none; }
+.btn-sync { background: white; color: var(--blue); border: 1px solid var(--blue); padding: 10px; border-radius: 10px; width: 100%; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
 
-        #loading { text-align: center; padding: 30px; font-weight: bold; color: var(--gray); }
-    </style>
+.grid-botoes{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:8px;
+margin-bottom:10px;
+}
+
+.card { 
+background: white; border-radius: 12px; padding: 18px; margin-bottom: 15px; 
+box-shadow: 0 2px 6px rgba(0,0,0,0.05); border-left: 6px solid var(--blue);
+cursor: pointer; user-select: none; transition: 0.3s;
+}
+.card.aberto { border-left-color: var(--green); }
+
+.card-header { display: flex; justify-content: space-between; font-weight: bold; color: var(--blue); font-size: 13px; margin-bottom: 10px; border-bottom: 1px solid #f1f1f1; padding-bottom: 8px; }
+
+.info-linha { font-size: 14px; margin: 5px 0; }
+.info-linha b { color: var(--blue); font-size: 12px; text-transform: uppercase; }
+
+.conteudo-expansivel { display: none; margin-top: 15px; padding-top: 10px; border-top: 1px dashed #ddd; }
+.card.aberto .conteudo-expansivel { display: block; }
+
+.bloco-texto { background: #f9f9f9; padding: 10px; border-radius: 8px; font-size: 13px; color: #444; margin-bottom: 10px; white-space: pre-wrap; border: 1px solid #eee; }
+
+.acoes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; }
+.btn-acao { border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px; text-align: center; }
+.btn-edit { background: #e8f0fe; color: #1967d2; }
+.btn-pdf { background: #e6f4ea; color: #137333; }
+
+#loading { text-align: center; padding: 30px; font-weight: bold; color: var(--gray); }
+</style>
 </head>
+
 <body>
 
 <div class="container">
-    <div class="header">
-        <h2>Meus Lançamentos</h2>
-        <div id="infoUser" style="font-size:12px; margin-top:5px; opacity:0.9">Carregando...</div>
-    </div>
+<div class="header">
+<h2>Meus Lançamentos</h2>
+<div id="infoUser" style="font-size:12px; margin-top:5px; opacity:0.9">Carregando...</div>
+</div>
 
-    <a href="menu.html" class="btn-voltar">⬅ VOLTAR AO MENU</a>
+<a href="menu.html" class="btn-voltar">⬅ VOLTAR AO MENU</a>
 
-    <button class="btn-sync" onclick="buscarDados()">🔄 ATUALIZAR LISTA</button>
+<button class="btn-sync" onclick="buscarDados()">🔄 ATUALIZAR LISTA</button>
 
 <button class="btn-sync" style="background-color: #1e8e3e; color: white; border: none;" onclick="gerarPDFGeral()">
-    🖨️ IMPRIMIR TODOS (PDF FILTRADO)
+🖨️ IMPRIMIR TODOS (PDF FILTRADO)
 </button>
-    
-    <div style="font-size: 10px; text-align: center; color: #888; margin-bottom: 10px;">💡 Dois cliques para expandir o card</div>
 
-    <input type="text" class="search-box" id="busca" placeholder="Filtrar por escola, data ou professor..." onkeyup="filtrar()">
+<div class="grid-botoes">
 
-    <div id="loading">Buscando na aba REGISTRO_INFANTIL...</div>
-    <div id="lista"></div>
+<button class="btn-sync" onclick="ordenarDesc()">↓ MAIS RECENTE</button>
+<button class="btn-sync" onclick="ordenarAsc()">↑ MAIS ANTIGA</button>
+
+</div>
+
+<div style="font-size: 10px; text-align: center; color: #888; margin-bottom: 10px;">💡 Dois cliques para expandir o card</div>
+
+<input type="text" class="search-box" id="busca" placeholder="Filtrar por escola, data ou professor..." onkeyup="filtrar()">
+
+<div id="loading">Buscando na aba REGISTRO_INFANTIL...</div>
+<div id="lista"></div>
 </div>
 
 <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxdQht0Ek7Y8o8p8QUbhynYK2yAhw0mXhwjYE6Dt7er9CYBtAgJCjXacntEXYcKTDLkNQ/exec';
-    const NOME_PROFESSOR = localStorage.getItem('user_nome');
-    let dadosCarregados = []; // --- NOVA VARIÁVEL GLOBAL ---
 
-    window.onload = () => {
-        if(!NOME_PROFESSOR) { window.location.href = 'index.html'; return; }
-        document.getElementById('infoUser').innerText = "Professor(a): " + NOME_PROFESSOR;
-        buscarDados();
-    };
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxdQht0Ek7Y8o8p8QUbhynYK2yAhw0mXhwjYE6Dt7er9CYBtAgJCjXacntEXYcKTDLkNQ/exec';
+const NOME_PROFESSOR = localStorage.getItem('user_nome');
+let dadosCarregados = []; 
 
- function buscarDados() {
-    const loading = document.getElementById('loading');
-    const lista = document.getElementById('lista');
-    loading.style.display = 'block';
-    lista.innerHTML = '';
+window.onload = () => {
+if(!NOME_PROFESSOR) { window.location.href = 'index.html'; return; }
+document.getElementById('infoUser').innerText = "Professor(a): " + NOME_PROFESSOR;
+buscarDados();
+};
 
-    fetch(`${SCRIPT_URL}?tipo=ler_registros&professor=${encodeURIComponent(NOME_PROFESSOR)}&nocache=${new Date().getTime()}`)
-        .then(r => r.json())
-        .then(dados => {
-            loading.style.display = 'none';
+function buscarDados() {
+const loading = document.getElementById('loading');
+const lista = document.getElementById('lista');
+loading.style.display = 'block';
+lista.innerHTML = '';
 
-            // --- AQUI ENTRA A MÁGICA DA ORDENAÇÃO ---
-            // Vamos organizar os dados por data de forma decrescente (mais novo primeiro)
-            dados.sort((a, b) => {
-                return new Date(b.data) - new Date(a.data);
-            });
-
-            dadosCarregados = dados; 
-            renderizar(dados);
-        });
+fetch(`${SCRIPT_URL}?tipo=ler_registros&professor=${encodeURIComponent(NOME_PROFESSOR)}&nocache=${new Date().getTime()}`)
+.then(r => r.json())
+.then(dados => {
+loading.style.display = 'none';
+dadosCarregados = dados;
+renderizar(dados);
+});
 }
 
-    function renderizar(dados) {
-        const lista = document.getElementById('lista');
-        dados.forEach(item => {
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.ondblclick = () => card.classList.toggle('aberto');
-            
-            card.innerHTML = `
-                <div class="card-header">
-                    <span>📅 DATA: ${formatarData(item.data)}</span>
-                    <span>🗓 BIMESTRE: ${item.bimestre}</span>  
-                </div>
-                <div class="info-linha"><b>👫 PROFESSOR(A):</b> ${item.professor}</div>   
-                <div class="info-linha"><b>🏡 ESCOLA:</b> ${item.escola}</div>
-                <div class="info-linha"><b>🕒 TURMA/TURNO:</b> ${item.turma} - ${item.turno}</div>    
-                <div class="info-linha"><b>📚 PRÁTICAS:</b> ${item.numAulas}</div>
-                <div class="info-linha"><b>📙 CAMPOS DE EXPERIÊNCIA:</b> ${item.campo}</div>
+function converterData(data){
+const p = data.split('/');
+return new Date(p[2], p[1]-1, p[0]);
+}
 
-                <div class="conteudo-expansivel">
-                    <b>🎯 OBJETIVOS DE APRENDIZAGEM (BNCC):</b>
-                    <div class="bloco-texto">${item.objetivos || item.objetivo}</div>  
-                    <b>📚 SABERES E CONHECIMENTO (METODOLOGIA):</b>
-                    <div class="bloco-texto">${item.metodologia}</div>
-                    ${item.observacoes ? `<b>📝 METODOLOGIA/PROPOSTA ATIVA:</b><div class="bloco-texto">${item.observacoes}</div>` : ''}
-                </div>
+function ordenarDesc(){
+dadosCarregados.sort((a,b)=> converterData(b.data) - converterData(a.data));
+renderizar(dadosCarregados);
+}
 
-               <div class="acoes">
-    <button class="btn-acao btn-edit" onclick="editar('${item.id}')">✏️ EDITAR</button>
-    <button class="btn-acao btn-pdf" onclick='gerarPDF(event, ${JSON.stringify(item)})'>📄 PDF</button>
+function ordenarAsc(){
+dadosCarregados.sort((a,b)=> converterData(a.data) - converterData(b.data));
+renderizar(dadosCarregados);
+}
+
+function renderizar(dados) {
+const lista = document.getElementById('lista');
+lista.innerHTML = '';
+
+dados.forEach(item => {
+const card = document.createElement('div');
+card.className = 'card';
+card.ondblclick = () => card.classList.toggle('aberto');
+
+card.innerHTML = `
+<div class="card-header">
+<span>📅 DATA: ${formatarData(item.data)}</span>
+<span>🗓 BIMESTRE: ${item.bimestre}</span>  
 </div>
-            `;
-            lista.appendChild(card);
-        });
-    }
+<div class="info-linha"><b>👫 PROFESSOR(A):</b> ${item.professor}</div>   
+<div class="info-linha"><b>🏡 ESCOLA:</b> ${item.escola}</div>
+<div class="info-linha"><b>🕒 TURMA/TURNO:</b> ${item.turma} - ${item.turno}</div>    
+<div class="info-linha"><b>📚 PRÁTICAS:</b> ${item.numAulas}</div>
+<div class="info-linha"><b>📙 CAMPOS DE EXPERIÊNCIA:</b> ${item.campo}</div>
 
-    function formatarData(data) {
-        if(!data) return "";
-        const p = data.split('-');
-        return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : data;
-    }
+<div class="conteudo-expansivel">
+<b>🎯 OBJETIVOS DE APRENDIZAGEM (BNCC):</b>
+<div class="bloco-texto">${item.objetivos || item.objetivo}</div>  
+<b>📚 SABERES E CONHECIMENTO (METODOLOGIA):</b>
+<div class="bloco-texto">${item.metodologia}</div>
+${item.observacoes ? `<b>📝 METODOLOGIA/PROPOSTA ATIVA:</b><div class="bloco-texto">${item.observacoes}</div>` : ''}
+</div>
 
-    function filtrar() {
-        const termo = document.getElementById('busca').value.toLowerCase();
-        const cards = document.getElementsByClassName('card');
-        Array.from(cards).forEach(c => {
-            c.style.display = c.innerText.toLowerCase().includes(termo) ? '' : 'none';
-        });
-    }
+<div class="acoes">
+<button class="btn-acao btn-edit" onclick="editar('${item.id}')">✏️ EDITAR</button>
+<button class="btn-acao btn-pdf" onclick='gerarPDF(event, ${JSON.stringify(item)})'>📄 PDF</button>
+</div>
+`;
+lista.appendChild(card);
+});
+}
+
+function formatarData(data) {
+if(!data) return "";
+const p = data.split('-');
+return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : data;
+}
+
+function filtrar() {
+const termo = document.getElementById('busca').value.toLowerCase();
+const cards = document.getElementsByClassName('card');
+Array.from(cards).forEach(c => {
+c.style.display = c.innerText.toLowerCase().includes(termo) ? '' : 'none';
+});
+}
 
 function editar(id) { 
-    if(!id || id === 'undefined') {
-        alert("Erro: Este registro não possui um ID válido para edição.");
-        return;
-    }
-    window.location.href = `formulario_infantil.html?editID=${id}`; 
+if(!id || id === 'undefined') {
+alert("Erro: Este registro não possui um ID válido para edição.");
+return;
+}
+window.location.href = `formulario_infantil.html?editID=${id}`; 
 }
 
-    // --- NOVA FUNÇÃO: GERAR PDF DE TODOS OS FILTRADOS ---
+    // --- FUNÇÃO AJUSTADA PARA MANTER O DESIGN DOS CARDS NO PDF ---
     function gerarPDFGeral() {
         const termo = document.getElementById('busca').value.toLowerCase();
-        // Filtra os dados originais baseado no que está na busca
         const dadosFiltrados = dadosCarregados.filter(item => {
             const textoCompleto = JSON.stringify(item).toLowerCase();
             return textoCompleto.includes(termo);
@@ -185,60 +210,46 @@ function editar(id) {
         const win = window.open('', '_blank');
         
         let htmlBase = `<html><head><style>
-            body { font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; color: #333; line-height: 1.4; }
-            .pagina { page-break-after: always; padding: 20px; border-bottom: 1px dashed #ccc; }
-            .header-pdf { text-align: center; border-bottom: 3px solid #1a73e8; padding-bottom: 10px; margin-bottom: 20px; }
-            .logo { max-height: 60px; }
-            .title { font-size: 16px; font-weight: bold; color: #1a73e8; margin-top: 5px; }
-            .grid-info { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; border: 1px solid #eee; padding: 10px; background: #fcfcfc; border-radius: 5px; }
-            .info-item { font-size: 11px; }
-            .info-item b { color: #1a73e8; text-transform: uppercase; font-size: 9px; display: block; }
-            .secao-titulo { font-weight: bold; font-size: 10px; color: #1a73e8; text-transform: uppercase; border-bottom: 1px solid #1a73e8; margin-top: 10px; }
-            .secao-conteudo { font-size: 12px; text-align: justify; white-space: pre-wrap; padding: 3px 0; }
-            .footer { margin-top: 30px; display: flex; justify-content: space-around; text-align: center; font-size: 9px; }
-            .assinatura { border-top: 1px solid #999; width: 180px; padding-top: 5px; }
-        </style></head><body>`;
+            body { font-family: 'Segoe UI', Arial, sans-serif; background: #f1f3f4; padding: 20px; }
+            .pdf-container { max-width: 650px; margin: auto; }
+            .card-pdf { 
+                background: white; border-radius: 12px; padding: 18px; margin-bottom: 20px; 
+                box-shadow: 0 2px 6px rgba(0,0,0,0.05); border-left: 6px solid #1a73e8;
+                page-break-inside: avoid;
+            }
+            .card-header { display: flex; justify-content: space-between; font-weight: bold; color: #1a73e8; font-size: 13px; margin-bottom: 10px; border-bottom: 1px solid #f1f1f1; padding-bottom: 8px; }
+            .info-linha { font-size: 14px; margin: 5px 0; }
+            .info-linha b { color: #1a73e8; font-size: 12px; text-transform: uppercase; }
+            .bloco-texto { background: #f9f9f9; padding: 10px; border-radius: 8px; font-size: 13px; color: #444; margin-bottom: 10px; white-space: pre-wrap; border: 1px solid #eee; }
+            h2 { text-align: center; color: #1a73e8; text-transform: uppercase; font-size: 18px; }
+        </style></head><body><div class="pdf-container">`;
 
-        const logos = {
-            "EMEIF MARIA MADALENA TORRES DANTAS": "https://lh3.googleusercontent.com/d/1m2edYTssohJHNbAsH6faLpD-EPiOFySV",
-            "EMEIF JOÃO GONÇALVES DA SILVA": "https://lh3.googleusercontent.com/d/1Azxwq1p2gHmOOJGUeKfIS0bqYGpnypcf",
-            "EMEIF JOSÉ ALVES SABINO": "https://lh3.googleusercontent.com/d/1CXvXM9S0DOtG5qglCTMW6ieNGthmRmhK",
-            "CRECHE MUNICIPAL RAIMUNDA TRINDADE SABINO": "https://lh3.googleusercontent.com/d/1oq-Ab-5mncMrnHTXxnmgbhgjJfP7y7Yj",
-            "EMEIF JOSÉ VIEIRA DA SILVA": "https://lh3.googleusercontent.com/d/19-cir2L2bWYR7sj39_DoNjpckopXRGz-",
-            "EMEIF MARIA PEREIRA DOS SANTOS": "https://lh3.googleusercontent.com/d/17G_gQ3Kaz9xSqBU--lblaSejZylqZ2t6",
-            "ESCOLA JARDIM DE DEUS AÇÃO EVANGELICA": "https://lh3.googleusercontent.com/d/1RWc8dAv73W9drrvqG44vHSNMS_RRxFh2"
-        };
+        htmlBase += `<h2>Relatório de Lançamentos - Diário Digital</h2>`;
 
         dadosFiltrados.forEach(item => {
-            const logoUrl = logos[item.escola] || "";
             htmlBase += `
-                <div class="pagina">
-                    <div class="header-pdf">
-                        ${logoUrl ? `<img src="${logoUrl}" class="logo">` : ''}
-                        <div class="title">PLANEJAMENTO PEDAGÓGICO</div>
+                <div class="card-pdf">
+                    <div class="card-header">
+                        <span>📅 DATA: ${formatarData(item.data)}</span>
+                        <span>🗓 BIMESTRE: ${item.bimestre}</span>  
                     </div>
-                    <div class="grid-info">
-                        <div class="info-item"><b>Bimestre</b>${item.bimestre}</div>
-                        <div class="info-item"><b>Data</b>${formatarData(item.data)}</div>
-                        <div class="info-item"><b>Professor</b>${item.professor}</div>
-                        <div class="info-item"><b>Práticas</b>${item.numAulas}</div>
-                        <div class="info-item" style="grid-column: span 2"><b>Escola</b>${item.escola}</div>
-                    </div>
-                    <div class="secao-titulo">CAMPOS DE EXPERIÊNCIA</div>
-                    <div class="secao-conteudo">${item.campo}</div>
-                    <div class="secao-titulo">OBJETIVOS DE CONHECIMENTO</div>
-                    <div class="secao-conteudo">${item.objetivos || item.objetivo}</div>
-                    <div class="secao-titulo">METODOLOGIA</div>
-                    <div class="secao-conteudo">${item.metodologia}</div>
-                    ${item.observacoes ? `<div class="secao-titulo">OBSERVAÇÕES</div><div class="secao-conteudo">${item.observacoes}</div>` : ''}
-                    <div class="footer">
-                        <div class="assinatura">Professor(a)</div>
-                        <div class="assinatura">Coordenação</div>
+                    <div class="info-linha"><b>👫 PROFESSOR(A):</b> ${item.professor}</div>   
+                    <div class="info-linha"><b>🏡 ESCOLA:</b> ${item.escola}</div>
+                    <div class="info-linha"><b>🕒 TURMA/TURNO:</b> ${item.turma} - ${item.turno}</div>    
+                    <div class="info-linha"><b>📚 PRÁTICAS:</b> ${item.numAulas}</div>
+                    <div class="info-linha"><b>📙 CAMPOS DE EXPERIÊNCIA:</b> ${item.campo}</div>
+                    
+                    <div style="margin-top:10px;">
+                        <b>🎯 OBJETIVOS DE APRENDIZAGEM (BNCC):</b>
+                        <div class="bloco-texto">${item.objetivos || item.objetivo}</div>  
+                        <b>📚 SABERES E CONHECIMENTO (METODOLOGIA):</b>
+                        <div class="bloco-texto">${item.metodologia}</div>
+                        ${item.observacoes ? `<b>📝 METODOLOGIA/PROPOSTA ATIVA:</b><div class="bloco-texto">${item.observacoes}</div>` : ''}
                     </div>
                 </div>`;
         });
 
-        htmlBase += `<script>window.onload = function() { window.print(); setTimeout(window.close, 500); };<\/script></body></html>`;
+        htmlBase += `</div><script>window.onload = function() { window.print(); setTimeout(window.close, 500); };<\/script></body></html>`;
         win.document.write(htmlBase);
         win.document.close();
     }
@@ -246,18 +257,16 @@ function editar(id) {
     function gerarPDF(event, dados) {
         if(event) event.stopPropagation();
         const win = window.open('', '_blank');
-        
         const logos = {
-           "EMEIF MARIA MADALENA TORRES DANTAS": "https://lh3.googleusercontent.com/d/1K-Ih0PBzwMzmQXB7lWTZLQIZVifViHfL ",
-            "EMEIF JOÃO GONÇALVES DA SILVA": "https://lh3.googleusercontent.com/d/1ifsNIUB2Ea18xaVSZiDqJkDV_940dieh ",
-            "EMEIF JOSÉ ALVES SABINO": "https://lh3.googleusercontent.com/d/1LE0qxYPlHKCMqzyXJRlVAKQ8P3-buMEU ",
-            "CRECHE MUNICIPAL RAIMUNDA TRINDADE SABINO": "https://lh3.googleusercontent.com/d/1WhyspgSIzYGFlAV4vOlQgzDXsnLd0TEo ",
-            "EMEIF JOSÉ VIEIRA DA SILVA": "https://lh3.googleusercontent.com/d/1rb3Pjy7IxHKlEWQEg5Q9eXG25QsCgfTv ",
-            "EMEIF MARIA PEREIRA DOS SANTOS": "https://lh3.googleusercontent.com/d/1uYhcIRmA3Ue_cpVG3uIh7UcoUCUv_63T ",
-            "ESCOLA JARDIM DE DEUS AÇÃO EVANGELICA": "https://lh3.googleusercontent.com/d/1-gnXVu-tiSxi7f9ai9irJ49zTtgxz8px ",
-            "EMEIF JOSÉ PEDRO DE MELO": "https://lh3.googleusercontent.com/d/1JoBnXC_DYapa5NL_mI3hXQcVkaONHntr "
+            "EMEIF MARIA MADALENA TORRES DANTAS": "https://lh3.googleusercontent.com/d/1K-Ih0PBzwMzmQXB7lWTZLQIZVifViHfL",
+            "EMEIF JOÃO GONÇALVES DA SILVA": "https://lh3.googleusercontent.com/d/1ifsNIUB2Ea18xaVSZiDqJkDV_940dieh",
+            "EMEIF JOSÉ ALVES SABINO": "https://lh3.googleusercontent.com/d/1LE0qxYPlHKCMqzyXJRlVAKQ8P3-buMEU",
+            "CRECHE MUNICIPAL RAIMUNDA TRINDADE SABINO": "https://lh3.googleusercontent.com/d/1WhyspgSIzYGFlAV4vOlQgzDXsnLd0TEo",
+            "EMEIF JOSÉ VIEIRA DA SILVA": "https://lh3.googleusercontent.com/d/1rb3Pjy7IxHKlEWQEg5Q9eXG25QsCgfTv",
+            "EMEIF MARIA PEREIRA DOS SANTOS": "https://lh3.googleusercontent.com/d/1uYhcIRmA3Ue_cpVG3uIh7UcoUCUv_63T",
+            "ESCOLA JARDIM DE DEUS AÇÃO EVANGELICA": "https://lh3.googleusercontent.com/d/1-gnXVu-tiSxi7f9ai9irJ49zTtgxz8px",
+            "EMEIF JOSÉ PEDRO DE MELO": "https://lh3.googleusercontent.com/d/1JoBnXC_DYapa5NL_mI3hXQcVkaONHntr"
         };
-
         const logoUrl = logos[dados.escola] || "";
 
         win.document.write(`
@@ -268,15 +277,12 @@ function editar(id) {
                     .header-pdf { text-align: center; border-bottom: 3px solid #1a73e8; padding-bottom: 15px; margin-bottom: 25px; }
                     .logo { max-height: 80px; margin-bottom: 10px; }
                     .title { font-size: 18px; font-weight: bold; color: #1a73e8; }
-                    
                     .grid-info { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; border: 1px solid #eee; padding: 15px; border-radius: 8px; background: #fcfcfc; }
                     .info-item { font-size: 12px; }
                     .info-item b { color: #1a73e8; text-transform: uppercase; font-size: 10px; display: block; }
-                    
                     .secao { margin-top: 20px; }
                     .secao-titulo { font-weight: bold; font-size: 11px; color: #1a73e8; text-transform: uppercase; border-bottom: 1px solid #1a73e8; margin-bottom: 8px; }
                     .secao-conteudo { font-size: 13px; text-align: justify; white-space: pre-wrap; padding: 5px 0 15px 0; }
-                    
                     .footer { margin-top: 50px; display: flex; justify-content: space-around; text-align: center; font-size: 10px; }
                     .assinatura { border-top: 1px solid #999; width: 200px; padding-top: 5px; }
                 </style>
@@ -286,7 +292,6 @@ function editar(id) {
                     ${logoUrl ? `<img src="${logoUrl}" class="logo"><br>` : ''}
                     <div class="title">PLANEJAMENTO PEDAGÓGICO</div>
                 </div>
-
                 <div class="grid-info">
                     <div class="info-item"><b>Bimestre</b>${dados.bimestre}</div>
                     <div class="info-item"><b>Data</b>${formatarData(dados.data)}</div>
@@ -296,38 +301,16 @@ function editar(id) {
                     <div class="info-item"><b>Turma</b>${dados.turma}</div>
                     <div class="info-item"><b>Turno</b>${dados.turno}</div>
                 </div>
-
-                <div class="secao">
-                    <div class="secao-titulo">CAMPOS DE EXPERIÊNCIA</div>
-                    <div class="secao-conteudo">${dados.campo}</div>
-                </div>
-
-                <div class="secao">
-                    <div class="secao-titulo">OBJETIVOS DE CONHECIMENTO</div>
-                    <div class="secao-conteudo">${dados.objetivos || dados.objetivo}</div>
-                </div>
-
-                <div class="secao">
-                    <div class="secao-titulo">METODOLOGIA E PROPOSTA ATIVA</div>
-                    <div class="secao-conteudo">${dados.metodologia}</div>
-                </div>
-
-                ${dados.observacoes ? `
-                <div class="secao">
-                    <div class="secao-titulo">OBSERVAÇÕES</div>
-                    <div class="secao-conteudo">${dados.observacoes}</div>
-                </div>` : ''}
-
+                <div class="secao"><div class="secao-titulo">CAMPOS DE EXPERIÊNCIA</div><div class="secao-conteudo">${dados.campo}</div></div>
+                <div class="secao"><div class="secao-titulo">OBJETIVOS DE CONHECIMENTO</div><div class="secao-conteudo">${dados.objetivos || dados.objetivo}</div></div>
+                <div class="secao"><div class="secao-titulo">METODOLOGIA E PROPOSTA ATIVA</div><div class="secao-conteudo">${dados.metodologia}</div></div>
+                ${dados.observacoes ? `<div class="secao"><div class="secao-titulo">OBSERVAÇÕES</div><div class="secao-conteudo">${dados.observacoes}</div></div>` : ''}
                 <div class="footer">
                     <div class="assinatura">Professor(a)</div>
                     <div class="assinatura">Coordenação / Direção</div>
                 </div>
-
                 <script>
-                    window.onload = function() {
-                        window.print();
-                        setTimeout(function() { window.close(); }, 500);
-                    };
+                    window.onload = function() { window.print(); setTimeout(function() { window.close(); }, 500); };
                     window.onafterprint = function() { window.close(); };
                 <\/script>
             </body>
