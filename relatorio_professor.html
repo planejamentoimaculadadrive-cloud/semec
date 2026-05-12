@@ -39,7 +39,9 @@ margin-bottom:10px;
 .card { 
 background: white; border-radius: 12px; padding: 18px; margin-bottom: 15px; 
 box-shadow: 0 2px 6px rgba(0,0,0,0.05); border-left: 6px solid var(--blue);
-cursor: pointer; user-select: none; transition: 0.3s;
+cursor: pointer; 
+/* user-select: none; REMOVIDO PARA PERMITIR COPIAR */
+transition: 0.3s;
 }
 .card.aberto { border-left-color: var(--green); }
 
@@ -79,10 +81,8 @@ cursor: pointer; user-select: none; transition: 0.3s;
 </button>
 
 <div class="grid-botoes">
-
 <button class="btn-sync" onclick="ordenarDesc()">↓ MAIS RECENTE</button>
 <button class="btn-sync" onclick="ordenarAsc()">↑ MAIS ANTIGA</button>
-
 </div>
 
 <div style="font-size: 10px; text-align: center; color: #888; margin-bottom: 10px;">💡 Dois cliques para expandir o card</div>
@@ -94,7 +94,6 @@ cursor: pointer; user-select: none; transition: 0.3s;
 </div>
 
 <script>
-
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxdQht0Ek7Y8o8p8QUbhynYK2yAhw0mXhwjYE6Dt7er9CYBtAgJCjXacntEXYcKTDLkNQ/exec';
 const NOME_PROFESSOR = localStorage.getItem('user_nome');
 let dadosCarregados = []; 
@@ -158,9 +157,9 @@ card.innerHTML = `
 <div class="conteudo-expansivel">
 <b>🎯 OBJETIVOS DE APRENDIZAGEM (BNCC):</b>
 <div class="bloco-texto">${item.objetivos || item.objetivo}</div>  
-<b>📚 SABERES E CONHECIMENTO (METODOLOGIA):</b>
+<b>📚 SABERES E CONHECIMENTO (Sequência didática) :</b>
 <div class="bloco-texto">${item.metodologia}</div>
-${item.observacoes ? `<b>📝 METODOLOGIA/PROPOSTA ATIVA:</b><div class="bloco-texto">${item.observacoes}</div>` : ''}
+${item.observacoes ? `<b>📝 METODOLOGIA/PROPOSTA ATIVA (OBSERVAÇÕES):</b><div class="bloco-texto">${item.observacoes}</div>` : ''}
 </div>
 
 <div class="acoes">
@@ -194,130 +193,126 @@ return;
 window.location.href = `formulario_infantil.html?editID=${id}`; 
 }
 
-    // --- FUNÇÃO AJUSTADA PARA MANTER O DESIGN DOS CARDS NO PDF ---
-    function gerarPDFGeral() {
-        const termo = document.getElementById('busca').value.toLowerCase();
-        const dadosFiltrados = dadosCarregados.filter(item => {
-            const textoCompleto = JSON.stringify(item).toLowerCase();
-            return textoCompleto.includes(termo);
-        });
+function gerarPDFGeral() {
+    const termo = document.getElementById('busca').value.toLowerCase();
+    const dadosFiltrados = dadosCarregados.filter(item => {
+        const textoCompleto = JSON.stringify(item).toLowerCase();
+        return textoCompleto.includes(termo);
+    });
 
-        if (dadosFiltrados.length === 0) {
-            alert("Nenhum registro encontrado para imprimir.");
-            return;
+    if (dadosFiltrados.length === 0) {
+        alert("Nenhum registro encontrado para imprimir.");
+        return;
+    }
+
+    const win = window.open('', '_blank');
+    let htmlBase = `<html><head><style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f1f3f4; padding: 20px; }
+        .pdf-container { max-width: 650px; margin: auto; }
+        .card-pdf { 
+            background: white; border-radius: 12px; padding: 18px; margin-bottom: 20px; 
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05); border-left: 6px solid #1a73e8;
+            page-break-inside: avoid;
         }
+        .card-header { display: flex; justify-content: space-between; font-weight: bold; color: #1a73e8; font-size: 13px; margin-bottom: 10px; border-bottom: 1px solid #f1f1f1; padding-bottom: 8px; }
+        .info-linha { font-size: 14px; margin: 5px 0; }
+        .info-linha b { color: #1a73e8; font-size: 12px; text-transform: uppercase; }
+        .bloco-texto { background: #f9f9f9; padding: 10px; border-radius: 8px; font-size: 13px; color: #444; margin-bottom: 10px; white-space: pre-wrap; border: 1px solid #eee; }
+        h2 { text-align: center; color: #1a73e8; text-transform: uppercase; font-size: 18px; }
+    </style></head><body><div class="pdf-container">`;
 
-        const win = window.open('', '_blank');
-        
-        let htmlBase = `<html><head><style>
-            body { font-family: 'Segoe UI', Arial, sans-serif; background: #f1f3f4; padding: 20px; }
-            .pdf-container { max-width: 650px; margin: auto; }
-            .card-pdf { 
-                background: white; border-radius: 12px; padding: 18px; margin-bottom: 20px; 
-                box-shadow: 0 2px 6px rgba(0,0,0,0.05); border-left: 6px solid #1a73e8;
-                page-break-inside: avoid;
-            }
-            .card-header { display: flex; justify-content: space-between; font-weight: bold; color: #1a73e8; font-size: 13px; margin-bottom: 10px; border-bottom: 1px solid #f1f1f1; padding-bottom: 8px; }
-            .info-linha { font-size: 14px; margin: 5px 0; }
-            .info-linha b { color: #1a73e8; font-size: 12px; text-transform: uppercase; }
-            .bloco-texto { background: #f9f9f9; padding: 10px; border-radius: 8px; font-size: 13px; color: #444; margin-bottom: 10px; white-space: pre-wrap; border: 1px solid #eee; }
-            h2 { text-align: center; color: #1a73e8; text-transform: uppercase; font-size: 18px; }
-        </style></head><body><div class="pdf-container">`;
+    htmlBase += `<h2>Relatório de Lançamentos - Diário Digital</h2>`;
 
-        htmlBase += `<h2>Relatório de Lançamentos - Diário Digital</h2>`;
-
-        dadosFiltrados.forEach(item => {
-            htmlBase += `
-                <div class="card-pdf">
-                    <div class="card-header">
-                        <span>📅 DATA: ${formatarData(item.data)}</span>
-                        <span>🗓 BIMESTRE: ${item.bimestre}</span>  
-                    </div>
-                    <div class="info-linha"><b>👫 PROFESSOR(A):</b> ${item.professor}</div>   
-                    <div class="info-linha"><b>🏡 ESCOLA:</b> ${item.escola}</div>
-                    <div class="info-linha"><b>🕒 TURMA/TURNO:</b> ${item.turma} - ${item.turno}</div>    
-                    <div class="info-linha"><b>📚 PRÁTICAS:</b> ${item.numAulas}</div>
-                    <div class="info-linha"><b>📙 CAMPOS DE EXPERIÊNCIA:</b> ${item.campo}</div>
-                    
-                    <div style="margin-top:10px;">
-                        <b>🎯 OBJETIVOS DE APRENDIZAGEM (BNCC):</b>
-                        <div class="bloco-texto">${item.objetivos || item.objetivo}</div>  
-                        <b>📚 SABERES E CONHECIMENTO (METODOLOGIA):</b>
-                        <div class="bloco-texto">${item.metodologia}</div>
-                        ${item.observacoes ? `<b>📝 METODOLOGIA/PROPOSTA ATIVA:</b><div class="bloco-texto">${item.observacoes}</div>` : ''}
-                    </div>
-                </div>`;
-        });
-
-        htmlBase += `</div><script>window.onload = function() { window.print(); setTimeout(window.close, 500); };<\/script></body></html>`;
-        win.document.write(htmlBase);
-        win.document.close();
-    }
-
-    function gerarPDF(event, dados) {
-        if(event) event.stopPropagation();
-        const win = window.open('', '_blank');
-        const logos = {
-            "EMEIF MARIA MADALENA TORRES DANTAS": "https://lh3.googleusercontent.com/d/1K-Ih0PBzwMzmQXB7lWTZLQIZVifViHfL",
-            "EMEIF JOÃO GONÇALVES DA SILVA": "https://lh3.googleusercontent.com/d/1ifsNIUB2Ea18xaVSZiDqJkDV_940dieh",
-            "EMEIF JOSÉ ALVES SABINO": "https://lh3.googleusercontent.com/d/1LE0qxYPlHKCMqzyXJRlVAKQ8P3-buMEU",
-            "CRECHE MUNICIPAL RAIMUNDA TRINDADE SABINO": "https://lh3.googleusercontent.com/d/1WhyspgSIzYGFlAV4vOlQgzDXsnLd0TEo",
-            "EMEIF JOSÉ VIEIRA DA SILVA": "https://lh3.googleusercontent.com/d/1rb3Pjy7IxHKlEWQEg5Q9eXG25QsCgfTv",
-            "EMEIF MARIA PEREIRA DOS SANTOS": "https://lh3.googleusercontent.com/d/1uYhcIRmA3Ue_cpVG3uIh7UcoUCUv_63T",
-            "ESCOLA JARDIM DE DEUS AÇÃO EVANGELICA": "https://lh3.googleusercontent.com/d/1-gnXVu-tiSxi7f9ai9irJ49zTtgxz8px",
-            "EMEIF JOSÉ PEDRO DE MELO": "https://lh3.googleusercontent.com/d/1JoBnXC_DYapa5NL_mI3hXQcVkaONHntr"
-        };
-        const logoUrl = logos[dados.escola] || "";
-
-        win.document.write(`
-            <html>
-            <head>
-                <style>
-                    body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; color: #333; line-height: 1.6; }
-                    .header-pdf { text-align: center; border-bottom: 3px solid #1a73e8; padding-bottom: 15px; margin-bottom: 25px; }
-                    .logo { max-height: 80px; margin-bottom: 10px; }
-                    .title { font-size: 18px; font-weight: bold; color: #1a73e8; }
-                    .grid-info { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; border: 1px solid #eee; padding: 15px; border-radius: 8px; background: #fcfcfc; }
-                    .info-item { font-size: 12px; }
-                    .info-item b { color: #1a73e8; text-transform: uppercase; font-size: 10px; display: block; }
-                    .secao { margin-top: 20px; }
-                    .secao-titulo { font-weight: bold; font-size: 11px; color: #1a73e8; text-transform: uppercase; border-bottom: 1px solid #1a73e8; margin-bottom: 8px; }
-                    .secao-conteudo { font-size: 13px; text-align: justify; white-space: pre-wrap; padding: 5px 0 15px 0; }
-                    .footer { margin-top: 50px; display: flex; justify-content: space-around; text-align: center; font-size: 10px; }
-                    .assinatura { border-top: 1px solid #999; width: 200px; padding-top: 5px; }
-                </style>
-            </head>
-            <body>
-                <div class="header-pdf">
-                    ${logoUrl ? `<img src="${logoUrl}" class="logo"><br>` : ''}
-                    <div class="title">PLANEJAMENTO PEDAGÓGICO</div>
+    dadosFiltrados.forEach(item => {
+        htmlBase += `
+            <div class="card-pdf">
+                <div class="card-header">
+                    <span>📅 DATA: ${formatarData(item.data)}</span>
+                    <span>🗓 BIMESTRE: ${item.bimestre}</span>  
                 </div>
-                <div class="grid-info">
-                    <div class="info-item"><b>Bimestre</b>${dados.bimestre}</div>
-                    <div class="info-item"><b>Data</b>${formatarData(dados.data)}</div>
-                    <div class="info-item"><b>Professor</b>${dados.professor}</div>
-                    <div class="info-item"><b>Práticas</b>${dados.numAulas}</div>
-                    <div class="info-item" style="grid-column: span 2"><b>Escola</b>${dados.escola}</div>
-                    <div class="info-item"><b>Turma</b>${dados.turma}</div>
-                    <div class="info-item"><b>Turno</b>${dados.turno}</div>
+                <div class="info-linha"><b>👫 PROFESSOR(A):</b> ${item.professor}</div>   
+                <div class="info-linha"><b>🏡 ESCOLA:</b> ${item.escola}</div>
+                <div class="info-linha"><b>🕒 TURMA/TURNO:</b> ${item.turma} - ${item.turno}</div>    
+                <div class="info-linha"><b>📚 PRÁTICAS:</b> ${item.numAulas}</div>
+                <div class="info-linha"><b>📙 CAMPOS DE EXPERIÊNCIA:</b> ${item.campo}</div>
+                <div style="margin-top:10px;">
+                    <b>🎯 OBJETIVOS DE APRENDIZAGEM (BNCC):</b>
+                    <div class="bloco-texto">${item.objetivos || item.objetivo}</div>  
+                    <b>📚 SABERES E CONHECIMENTO (METODOLOGIA):</b>
+                    <div class="bloco-texto">${item.metodologia}</div>
+                    ${item.observacoes ? `<b>📝 METODOLOGIA/PROPOSTA ATIVA:</b><div class="bloco-texto">${item.observacoes}</div>` : ''}
                 </div>
-                <div class="secao"><div class="secao-titulo">CAMPOS DE EXPERIÊNCIA</div><div class="secao-conteudo">${dados.campo}</div></div>
-                <div class="secao"><div class="secao-titulo">OBJETIVOS DE CONHECIMENTO</div><div class="secao-conteudo">${dados.objetivos || dados.objetivo}</div></div>
-                <div class="secao"><div class="secao-titulo">METODOLOGIA E PROPOSTA ATIVA</div><div class="secao-conteudo">${dados.metodologia}</div></div>
-                ${dados.observacoes ? `<div class="secao"><div class="secao-titulo">OBSERVAÇÕES</div><div class="secao-conteudo">${dados.observacoes}</div></div>` : ''}
-                <div class="footer">
-                    <div class="assinatura">Professor(a)</div>
-                    <div class="assinatura">Coordenação / Direção</div>
-                </div>
-                <script>
-                    window.onload = function() { window.print(); setTimeout(function() { window.close(); }, 500); };
-                    window.onafterprint = function() { window.close(); };
-                <\/script>
-            </body>
-            </html>
-        `);
-        win.document.close();
-    }
+            </div>`;
+    });
+
+    htmlBase += `</div><script>window.onload = function() { window.print(); setTimeout(window.close, 500); };<\/script></body></html>`;
+    win.document.write(htmlBase);
+    win.document.close();
+}
+
+function gerarPDF(event, dados) {
+    if(event) event.stopPropagation();
+    const win = window.open('', '_blank');
+    const logos = {
+        "EMEIF MARIA MADALENA TORRES DANTAS": "https://lh3.googleusercontent.com/d/1K-Ih0PBzwMzmQXB7lWTZLQIZVifViHfL",
+        "EMEIF JOÃO GONÇALVES DA SILVA": "https://lh3.googleusercontent.com/d/1ifsNIUB2Ea18xaVSZiDqJkDV_940dieh",
+        "EMEIF JOSÉ ALVES SABINO": "https://lh3.googleusercontent.com/d/1LE0qxYPlHKCMqzyXJRlVAKQ8P3-buMEU",
+        "CRECHE MUNICIPAL RAIMUNDA TRINDADE SABINO": "https://lh3.googleusercontent.com/d/1WhyspgSIzYGFlAV4vOlQgzDXsnLd0TEo",
+        "EMEIF JOSÉ VIEIRA DA SILVA": "https://lh3.googleusercontent.com/d/1rb3Pjy7IxHKlEWQEg5Q9eXG25QsCgfTv",
+        "EMEIF MARIA PEREIRA DOS SANTOS": "https://lh3.googleusercontent.com/d/1uYhcIRmA3Ue_cpVG3uIh7UcoUCUv_63T",
+        "ESCOLA JARDIM DE DEUS AÇÃO EVANGELICA": "https://lh3.googleusercontent.com/d/1-gnXVu-tiSxi7f9ai9irJ49zTtgxz8px",
+        "EMEIF JOSÉ PEDRO DE MELO": "https://lh3.googleusercontent.com/d/1JoBnXC_DYapa5NL_mI3hXQcVkaONHntr"
+    };
+    const logoUrl = logos[dados.escola] || "";
+
+    win.document.write(`
+        <html>
+        <head>
+            <style>
+                body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; color: #333; line-height: 1.6; }
+                .header-pdf { text-align: center; border-bottom: 3px solid #1a73e8; padding-bottom: 15px; margin-bottom: 25px; }
+                .logo { max-height: 80px; margin-bottom: 10px; }
+                .title { font-size: 18px; font-weight: bold; color: #1a73e8; }
+                .grid-info { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; border: 1px solid #eee; padding: 15px; border-radius: 8px; background: #fcfcfc; }
+                .info-item { font-size: 12px; }
+                .info-item b { color: #1a73e8; text-transform: uppercase; font-size: 10px; display: block; }
+                .secao { margin-top: 20px; }
+                .secao-titulo { font-weight: bold; font-size: 11px; color: #1a73e8; text-transform: uppercase; border-bottom: 1px solid #1a73e8; margin-bottom: 8px; }
+                .secao-conteudo { font-size: 13px; text-align: justify; white-space: pre-wrap; padding: 5px 0 15px 0; }
+                .footer { margin-top: 50px; display: flex; justify-content: space-around; text-align: center; font-size: 10px; }
+                .assinatura { border-top: 1px solid #999; width: 200px; padding-top: 5px; }
+            </style>
+        </head>
+        <body>
+            <div class="header-pdf">
+                ${logoUrl ? `<img src="${logoUrl}" class="logo"><br>` : ''}
+                <div class="title">PLANEJAMENTO PEDAGÓGICO</div>
+            </div>
+            <div class="grid-info">
+                <div class="info-item"><b>Bimestre</b>${dados.bimestre}</div>
+                <div class="info-item"><b>Data</b>${formatarData(dados.data)}</div>
+                <div class="info-item"><b>Professor</b>${dados.professor}</div>
+                <div class="info-item"><b>Práticas</b>${dados.numAulas}</div>
+                <div class="info-item" style="grid-column: span 2"><b>Escola</b>${dados.escola}</div>
+                <div class="info-item"><b>Turma</b>${dados.turma}</div>
+                <div class="info-item"><b>Turno</b>${dados.turno}</div>
+            </div>
+            <div class="secao"><div class="secao-titulo">CAMPOS DE EXPERIÊNCIA</div><div class="secao-conteudo">${dados.campo}</div></div>
+            <div class="secao"><div class="secao-titulo">OBJETIVOS DE CONHECIMENTO</div><div class="secao-conteudo">${dados.objetivos || dados.objetivo}</div></div>
+            <div class="secao"><div class="secao-titulo">METODOLOGIA E PROPOSTA ATIVA</div><div class="secao-conteudo">${dados.metodologia}</div></div>
+            ${dados.observacoes ? `<div class="secao"><div class="secao-titulo">OBSERVAÇÕES</div><div class="secao-conteudo">${dados.observacoes}</div></div>` : ''}
+            <div class="footer">
+                <div class="assinatura">Professor(a)</div>
+                <div class="assinatura">Coordenação / Direção</div>
+            </div>
+            <script>
+                window.onload = function() { window.print(); setTimeout(function() { window.close(); }, 500); };
+            <\/script>
+        </body>
+        </html>
+    `);
+    win.document.close();
+}
 </script>
 </body>
 </html>
